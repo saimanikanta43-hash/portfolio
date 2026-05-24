@@ -44,13 +44,21 @@ export default function Hero() {
         overflow:   "hidden",
       }}
     >
-      {/* ── Keyframes ── */}
+      {/* ── Keyframes + mobile overrides ── */}
       <style>{`
         @keyframes hero-bounce {
           0%, 100% { transform: translateY(0);  }
           50%       { transform: translateY(7px); }
         }
         .hero-scroll { animation: hero-bounce 2.2s ease-in-out infinite; }
+
+        @media (max-width: 768px) {
+          .hero-text-block  { top: 30% !important; }
+          .hero-name        { font-size: 2.8rem !important; }
+          .hero-skyline-img { min-height: 45vh; object-fit: cover; object-position: center bottom; }
+          .hero-scroll-pos  { bottom: auto !important; top: 70% !important; }
+          .hero-scroll-label{ font-size: 0.65rem !important; }
+        }
       `}</style>
 
       {/* ── SVG grain noise overlay ── */}
@@ -74,6 +82,7 @@ export default function Hero() {
 
       {/* ── Center text block ── */}
       <div
+        className="hero-text-block"
         style={{
           position:  "absolute",
           top:       "35%",
@@ -86,6 +95,7 @@ export default function Hero() {
         }}
       >
         <h1
+          className="hero-name"
           style={{
             fontFamily:    "'Cormorant Garamond', serif",
             fontSize:      "clamp(2.6rem, 6vw, 6rem)",
@@ -169,6 +179,7 @@ export default function Hero() {
             src="/skyline.svg"
             alt=""
             aria-hidden
+            className="hero-skyline-img"
             style={{ width: "100%", display: "block" }}
           />
         </div>
@@ -200,34 +211,38 @@ export default function Hero() {
       />
 
       {/* ── Scroll indicator ── */}
+      {/* Outer: handles position only; inner: handles bounce only (keeps transforms separate) */}
       <div
-        className="hero-scroll"
+        className="hero-scroll-pos"
         style={{
-          position:  "absolute",
-          bottom:    36,
-          left:      "50%",
-          transform: "translateX(-50%)",
-          textAlign: "center",
-          zIndex:    6,
-          opacity:   textIn ? 0.65 : 0,
+          position:   "absolute",
+          bottom:     36,
+          left:       "50%",
+          transform:  "translateX(-50%)",
+          textAlign:  "center",
+          zIndex:     6,
+          opacity:    textIn ? 0.65 : 0,
           transition: "opacity 1s ease 0.6s",
         }}
       >
-        <p
-          style={{
-            fontFamily:    "'Inter', sans-serif",
-            fontSize:      "0.52rem",
-            letterSpacing: "0.42em",
-            textTransform: "uppercase",
-            color:         "#c9a96e",
-            margin:        "0 0 10px",
-          }}
-        >
-          Scroll
-        </p>
-        <svg width="1" height="20" viewBox="0 0 1 20" style={{ display: "block", margin: "0 auto" }}>
-          <line x1="0.5" y1="0" x2="0.5" y2="20" stroke="#c9a96e" strokeWidth="0.7" opacity="0.6" />
-        </svg>
+        <div className="hero-scroll">
+          <p
+            className="hero-scroll-label"
+            style={{
+              fontFamily:    "'Inter', sans-serif",
+              fontSize:      "0.52rem",
+              letterSpacing: "0.42em",
+              textTransform: "uppercase",
+              color:         "#c9a96e",
+              margin:        "0 0 10px",
+            }}
+          >
+            Scroll
+          </p>
+          <svg width="1" height="20" viewBox="0 0 1 20" style={{ display: "block", margin: "0 auto" }}>
+            <line x1="0.5" y1="0" x2="0.5" y2="20" stroke="#c9a96e" strokeWidth="0.7" opacity="0.6" />
+          </svg>
+        </div>
       </div>
     </section>
   );
