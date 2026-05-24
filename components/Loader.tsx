@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const NAME = "SaiManiKanta";
+const NAME    = "SaiManiKanta";
+const LETTERS = NAME.split(""); // ['S','a','i','M','a','n','i','K','a','n','t','a']
 
 const SCRIPT_CHARS = [
   // Telugu
@@ -21,16 +22,17 @@ const SCRIPT_CHARS = [
   'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T',
 ];
 
-// ── Timing (ms) ─────────────────────────────────────────────────────────────
-const SCRAMBLE_START  = 1000;                                  // phase 2 begin
-const SCRAMBLE_STAGGER = 60;                                   // per-letter start delay
-const SCRAMBLE_SPEED  = 80;                                    // ms per character swap
-const LOCK_START      = 3500;                                  // phase 3 begin
-const LOCK_GAP        = 180;                                   // ms between each lock
-const LAST_LOCK       = LOCK_START + (NAME.length - 1) * LOCK_GAP; // 5480ms
-const TAGLINE_IN      = LAST_LOCK  + 300;                     // 5780ms
-const EXIT_AT         = TAGLINE_IN + 600 + 800;               // 7180ms
-const DONE_AT         = EXIT_AT    + 700;                      // 7880ms
+const rand = () => SCRIPT_CHARS[Math.floor(Math.random() * SCRIPT_CHARS.length)];
+
+// ── Timing ────────────────────────────────────────────────────────────────────
+const SCRAMBLE_START = 800;                                        // all letters begin
+const SCRAMBLE_SPEED = 80;                                         // ms per swap
+const LOCK_START     = 2000;                                       // letter[0] locks
+const LOCK_GAP       = 180;                                        // ms between each lock
+const LAST_LOCK      = LOCK_START + (LETTERS.length - 1) * LOCK_GAP; // 3980ms
+const TAGLINE_IN     = LAST_LOCK  + 300;                           // 4280ms
+const EXIT_AT        = TAGLINE_IN + 600 + 700;                     // 5580ms
+const DONE_AT        = EXIT_AT    + 700;                           // 6280ms
 
 export default function Loader() {
   const [visible,   setVisible]   = useState(true);
@@ -38,66 +40,70 @@ export default function Loader() {
   const [exiting,   setExiting]   = useState(false);
   const [taglineIn, setTaglineIn] = useState(false);
 
-  const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const intervals  = useRef<(ReturnType<typeof setInterval> | null)[]>(
-    new Array(NAME.length).fill(null)
+  // One ref per letter for direct DOM access — avoids state re-renders during scramble
+  const spanRefs  = useRef<(HTMLSpanElement | null)[]>([]);
+  const intervals = useRef<(ReturnType<typeof setInterval> | null)[]>(
+    new Array(LETTERS.length).fill(null)
   );
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
     const timers: ReturnType<typeof setTimeout>[] = [];
-    const add = (fn: () => void, delay: number) => {
-      const id = setTimeout(fn, delay);
+    const later = (fn: () => void, ms: number) => {
+      const id = setTimeout(fn, ms);
       timers.push(id);
     };
 
-    // Phase 1 — Logo fades in
-    add(() => setLogoIn(true), 50);
+    // Phase 1 — Logo scales in
+    later(() => setLogoIn(true), 50);
 
-    // Phase 2 — Each letter scrambles (staggered start)
-    for (let i = 0; i < NAME.length; i++) {
-      const idx = i;
-      add(() => {
-        const span = letterRefs.current[idx];
+    // Phase 2 — All letters start scrambling at the same time
+    later(() => {
+      LETTERS.forEach((_, idx) => {
+        const span = spanRefs.current[idx];
         if (!span) return;
         span.style.filter = "blur(0.5px)";
         intervals.current[idx] = setInterval(() => {
-          const s = letterRefs.current[idx];
-          if (s) s.textContent = SCRIPT_CHARS[Math.floor(Math.random() * SCRIPT_CHARS.length)];
+          const s = spanRefs.current[idx];
+          if (s) s.textContent = rand();
         }, SCRAMBLE_SPEED);
-      }, SCRAMBLE_START + idx * SCRAMBLE_STAGGER);
-    }
+      });
+    }, SCRAMBLE_START);
 
-    // Phase 3 — Lock letters left → right
-    for (let i = 0; i < NAME.length; i++) {
-      const idx    = i;
-      const letter = NAME[idx];
-      add(() => {
+    // Phase 3 — Lock left → right, one by one
+    LETTERS.forEach((letter, idx) => {
+      later(() => {
+        // Stop this letter's scramble
         const iv = intervals.current[idx];
         if (iv !== null) { clearInterval(iv); intervals.current[idx] = null; }
-        const span = letterRefs.current[idx];
+
+        const span = spanRefs.current[idx];
         if (!span) return;
 
-        span.textContent         = letter;
-        span.style.filter        = "blur(0px)";
-        span.style.color         = "#ffffff";  // white flash
-        span.style.transition    = "";
+        // Snap: correct char + white flash + scale pop
+        span.style.transition = "";
+        span.textContent      = letter;
+        span.style.filter     = "blur(0px)";
+        span.style.color      = "#ffffff";
+        span.style.transform  = "scale(1.2)";
 
+        // Settle to gold + scale back down
         setTimeout(() => {
-          if (!letterRefs.current[idx]) return;
-          letterRefs.current[idx]!.style.transition = "color 0.25s ease";
-          letterRefs.current[idx]!.style.color      = "#c9a96e";
-        }, 160);
+          if (!spanRefs.current[idx]) return;
+          spanRefs.current[idx]!.style.transition = "color 0.25s ease, transform 0.2s ease";
+          spanRefs.current[idx]!.style.color      = "#c9a96e";
+          spanRefs.current[idx]!.style.transform  = "scale(1)";
+        }, 100);
       }, LOCK_START + idx * LOCK_GAP);
-    }
+    });
 
-    // Phase 4 — Tagline
-    add(() => setTaglineIn(true), TAGLINE_IN);
+    // Phase 4 — Tagline appears
+    later(() => setTaglineIn(true), TAGLINE_IN);
 
-    // Phase 5 — Exit
-    add(() => setExiting(true), EXIT_AT);
-    add(() => {
+    // Phase 5 — Fade out, unlock scroll, unmount
+    later(() => setExiting(true), EXIT_AT);
+    later(() => {
       document.body.style.overflow = "";
       setVisible(false);
     }, DONE_AT);
@@ -114,17 +120,19 @@ export default function Loader() {
   return (
     <>
       <style>{`
-        @keyframes smk-cw     { from { transform: rotate(0deg);   } to { transform: rotate(360deg);  } }
-        @keyframes smk-ccw60  { from { transform: rotate(60deg);  } to { transform: rotate(-300deg); } }
-        @keyframes smk-cw-n60 { from { transform: rotate(-60deg); } to { transform: rotate(300deg);  } }
-        @keyframes smk-pulse  { 0%,100% { transform: scale(1); } 50% { transform: scale(1.38); } }
-        @keyframes smk-glow   { 0%,100% { opacity: 0.22; } 50% { opacity: 0.58; } }
-        .smk-r1   { transform-box:fill-box;transform-origin:center;animation:smk-cw 10s linear infinite; }
-        .smk-r2   { transform-box:fill-box;transform-origin:center;animation:smk-ccw60 7s linear infinite; }
-        .smk-r3   { transform-box:fill-box;transform-origin:center;animation:smk-cw-n60 14s linear infinite; }
-        .smk-dot  { transform-box:fill-box;transform-origin:center;animation:smk-pulse 2.4s ease-in-out infinite; }
-        .smk-glow { animation:smk-glow 2.4s ease-in-out infinite; }
-        @media (max-width: 768px) { .smk-name { font-size: 2.2rem !important; letter-spacing: 0.14em !important; } }
+        @keyframes smk-cw     { from { transform:rotate(0deg);   } to { transform:rotate(360deg);  } }
+        @keyframes smk-ccw60  { from { transform:rotate(60deg);  } to { transform:rotate(-300deg); } }
+        @keyframes smk-cw-n60 { from { transform:rotate(-60deg); } to { transform:rotate(300deg);  } }
+        @keyframes smk-pulse  { 0%,100%{transform:scale(1);}     50%{transform:scale(1.38);}        }
+        @keyframes smk-glow   { 0%,100%{opacity:0.22;}           50%{opacity:0.58;}                 }
+        .smk-r1  { transform-box:fill-box;transform-origin:center;animation:smk-cw 10s linear infinite; }
+        .smk-r2  { transform-box:fill-box;transform-origin:center;animation:smk-ccw60 7s linear infinite; }
+        .smk-r3  { transform-box:fill-box;transform-origin:center;animation:smk-cw-n60 14s linear infinite; }
+        .smk-dot { transform-box:fill-box;transform-origin:center;animation:smk-pulse 2.4s ease-in-out infinite; }
+        .smk-glow{ animation:smk-glow 2.4s ease-in-out infinite; }
+        @media (max-width:768px){
+          .smk-name { font-size:2.2rem !important; letter-spacing:0.14em !important; }
+        }
       `}</style>
 
       <div
@@ -161,11 +169,11 @@ export default function Loader() {
           </svg>
         </div>
 
-        {/* ── Studio name — direct DOM scramble via refs ── */}
+        {/* ── Studio name — each letter is an independent slot ── */}
         <div
           className="smk-name"
           style={{
-            fontFamily:    "'Cormorant Garamond', serif",
+            fontFamily:    "'Cormorant Garamond','Noto Sans','Noto Sans Telugu','Noto Sans Devanagari','Noto Sans Arabic',sans-serif",
             fontSize:      "3.5rem",
             fontWeight:    300,
             letterSpacing: "0.2em",
@@ -176,15 +184,16 @@ export default function Loader() {
             transition:    "opacity 0.6s ease 0.3s",
           }}
         >
-          {NAME.split("").map((letter, i) => (
+          {LETTERS.map((letter, i) => (
             <span
               key={i}
-              ref={el => { letterRefs.current[i] = el; }}
+              ref={el => { spanRefs.current[i] = el; }}
               style={{
-                display:   "inline-block",
-                color:     "#c9a96e",
-                minWidth:  "0.55em",
-                textAlign: "center",
+                display:    "inline-block",
+                width:      "1ch",        // fixed width — prevents layout shift
+                textAlign:  "center",
+                overflow:   "hidden",
+                color:      "#c9a96e",
               }}
             >
               {letter}
