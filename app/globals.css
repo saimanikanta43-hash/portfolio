@@ -26,7 +26,6 @@ body {
   font-family: "Inter", sans-serif;
   font-weight: 300;
   overflow-x: hidden;
-  cursor: none;
 }
 
 h1,
@@ -47,7 +46,6 @@ h4 {
 
 a,
 button {
-  cursor: none;
   color: inherit;
   text-decoration: none;
 }
