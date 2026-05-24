@@ -17,7 +17,7 @@ export default function Contact() {
     width: "100%",
     background: "transparent",
     border: "none",
-    borderBottom: "1px solid rgba(0,0,0,0.12)",
+    borderBottom: "1px solid rgba(255,255,255,0.12)",
     outline: "none",
     padding: "16px 0",
     fontFamily: "'Inter', sans-serif",
@@ -103,7 +103,7 @@ export default function Contact() {
                 fontSize: "0.9rem",
                 fontWeight: 300,
                 lineHeight: 1.8,
-                color: "#666666",
+                color: "#888888",
                 marginBottom: 48,
                 maxWidth: 380,
               }}
@@ -234,7 +234,7 @@ export default function Contact() {
                   fontFamily: "'Inter', sans-serif",
                   fontSize: "0.9rem",
                   fontWeight: 300,
-                  color: "#666666",
+                  color: "#888888",
                   lineHeight: 1.8,
                 }}
               >
@@ -252,7 +252,7 @@ export default function Contact() {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   style={inputStyle}
                   onFocus={(e) => (e.currentTarget.style.borderBottomColor = "rgba(184,92,117,0.5)")}
-                  onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(0,0,0,0.12)")}
+                  onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(255,255,255,0.12)")}
                 />
               </div>
               <div>
@@ -264,7 +264,7 @@ export default function Contact() {
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   style={inputStyle}
                   onFocus={(e) => (e.currentTarget.style.borderBottomColor = "rgba(184,92,117,0.5)")}
-                  onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(0,0,0,0.12)")}
+                  onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(255,255,255,0.12)")}
                 />
               </div>
               <div>
@@ -276,7 +276,7 @@ export default function Contact() {
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   style={{ ...inputStyle, resize: "none" }}
                   onFocus={(e) => (e.currentTarget.style.borderBottomColor = "rgba(184,92,117,0.5)")}
-                  onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(0,0,0,0.12)")}
+                  onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(255,255,255,0.12)")}
                 />
               </div>
 

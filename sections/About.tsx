@@ -139,7 +139,7 @@ export default function About() {
           display: "flex",
           gap: "clamp(40px, 8vw, 120px)",
           paddingTop: 40,
-          borderTop: "1px solid rgba(0,0,0,0.1)",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
           maxWidth: 920,
         }}
       >

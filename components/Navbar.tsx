@@ -55,10 +55,10 @@ export default function Navbar() {
           background:    dark
             ? "transparent"
             : scrolled
-            ? "rgba(250,250,248,0.92)"
+            ? "rgba(10,10,10,0.92)"
             : "transparent",
           backdropFilter: !dark && scrolled ? "blur(12px)" : "none",
-          borderBottom:   !dark && scrolled ? "1px solid rgba(0,0,0,0.06)" : "none",
+          borderBottom:   !dark && scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
           transition:     "background 0.6s ease, backdrop-filter 0.6s ease, border-bottom 0.6s ease",
         }}
       >
@@ -70,7 +70,7 @@ export default function Navbar() {
             fontSize:      "1.1rem",
             fontWeight:    500,
             letterSpacing: "0.1em",
-            color:         dark ? "rgba(255,255,255,0.88)" : scrolled ? "#111111" : "#F2E8DC",
+            color:         dark ? "rgba(255,255,255,0.88)" : scrolled ? "#f5f0e8" : "#F2E8DC",
             transition:    "color 0.5s ease",
           }}
         >
@@ -89,14 +89,14 @@ export default function Navbar() {
                   fontWeight:    400,
                   letterSpacing: "0.24em",
                   textTransform: "uppercase",
-                  color:         dark ? "rgba(255,255,255,0.42)" : scrolled ? "#888888" : "#9E8E98",
+                  color:         dark ? "rgba(255,255,255,0.42)" : scrolled ? "rgba(255,255,255,0.55)" : "#9E8E98",
                   transition:    "color 0.3s ease",
                 }}
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.color = dark ? "rgba(255,255,255,0.90)" : scrolled ? "#111111" : "#F2E8DC")
+                  (e.currentTarget.style.color = dark ? "rgba(255,255,255,0.90)" : scrolled ? "#f5f0e8" : "#F2E8DC")
                 }
                 onMouseLeave={(e) =>
-                  (e.currentTarget.style.color = dark ? "rgba(255,255,255,0.42)" : scrolled ? "#888888" : "#9E8E98")
+                  (e.currentTarget.style.color = dark ? "rgba(255,255,255,0.42)" : scrolled ? "rgba(255,255,255,0.55)" : "#9E8E98")
                 }
               >
                 {link}

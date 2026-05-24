@@ -2,12 +2,12 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #FAFAF8;
-  --bg-secondary: #F2EFE9;
-  --bg-tertiary: #E8E4DD;
-  --text: #111111;
-  --text-muted: #666666;
-  --accent: #B85C75;
+  --bg: #0f0f0f;
+  --bg-secondary: #161616;
+  --bg-tertiary: #1e1e1e;
+  --text: #f5f0e8;
+  --text-muted: #888888;
+  --accent: #c9a96e;
 }
 
 * {
@@ -53,7 +53,7 @@ button {
 }
 
 ::placeholder {
-  color: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.28);
 }
 
 /* Film grain overlay */

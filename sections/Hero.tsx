@@ -185,7 +185,7 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* ── Bottom fade — keeps dark floor anchored regardless of parallax ── */}
+      {/* ── Bottom fade — anchors skyline into hero background ── */}
       <div
         style={{
           position:      "absolute",
@@ -193,9 +193,23 @@ export default function Hero() {
           left:          0,
           right:         0,
           height:        "22%",
-          background:    "linear-gradient(to top, #0a0a0a 0%, transparent 100%)",
+          background:    "linear-gradient(to top, #0f0f0f 0%, transparent 100%)",
           pointerEvents: "none",
           zIndex:        3,
+        }}
+      />
+
+      {/* ── Section transition — bleeds hero into portfolio ── */}
+      <div
+        style={{
+          position:      "absolute",
+          bottom:        0,
+          left:          0,
+          right:         0,
+          height:        "30%",
+          background:    "linear-gradient(to bottom, transparent 70%, #0f0f0f 100%)",
+          pointerEvents: "none",
+          zIndex:        5,
         }}
       />
 

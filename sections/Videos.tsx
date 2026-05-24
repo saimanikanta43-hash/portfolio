@@ -238,9 +238,9 @@ export default function Videos() {
                   fontSize: "0.58rem",
                   letterSpacing: "0.25em",
                   textTransform: "uppercase",
-                  color: active ? "#111111" : "#888888",
+                  color: active ? "#f5f0e8" : "#666666",
                   background: "transparent",
-                  border: `1px solid ${active ? "rgba(184,92,117,0.7)" : "rgba(0,0,0,0.12)"}`,
+                  border: `1px solid ${active ? "rgba(201,169,110,0.7)" : "rgba(255,255,255,0.1)"}`,
                   cursor: "pointer",
                   transition: "all 0.3s ease",
                   whiteSpace: "nowrap",
@@ -271,7 +271,7 @@ export default function Videos() {
             height: 44,
             borderRadius: "50%",
             border: "1px solid rgba(212,137,154,0.4)",
-            background: "rgba(250,250,248,0.9)",
+            background: "rgba(15,15,15,0.85)",
             backdropFilter: "blur(8px)",
             display: "flex",
             alignItems: "center",
@@ -299,7 +299,7 @@ export default function Videos() {
             height: 44,
             borderRadius: "50%",
             border: "1px solid rgba(212,137,154,0.4)",
-            background: "rgba(250,250,248,0.9)",
+            background: "rgba(15,15,15,0.85)",
             backdropFilter: "blur(8px)",
             display: "flex",
             alignItems: "center",
@@ -505,8 +505,8 @@ export default function Videos() {
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
-              background: "rgba(0,0,0,0.04)",
-              border: "1px solid rgba(0,0,0,0.1)",
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.1)",
               borderRadius: 20,
               padding: "6px 16px",
             }}
@@ -521,12 +521,12 @@ export default function Videos() {
             >
               {currentIndex + 1}
             </span>
-            <span style={{ color: "rgba(0,0,0,0.3)", fontSize: "0.75rem" }}>/</span>
+            <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem" }}>/</span>
             <span
               style={{
                 fontFamily: "'Inter', sans-serif",
                 fontSize: "0.75rem",
-                color: "rgba(0,0,0,0.4)",
+                color: "rgba(255,255,255,0.45)",
               }}
             >
               {filtered.length}

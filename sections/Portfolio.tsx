@@ -192,7 +192,7 @@ export default function Portfolio() {
                 backgroundColor: "#111",
                 borderWidth: "1.5px",
                 borderStyle: "solid",
-                borderColor: isActive ? "#B85C75" : "#D8D0C8",
+                borderColor: isActive ? "#c9a96e" : "rgba(255,255,255,0.08)",
                 boxShadow:
                   isActive
                     ? "0 20px 60px rgba(0,0,0,0.55)"
