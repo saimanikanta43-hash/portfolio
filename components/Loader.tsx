@@ -26,9 +26,9 @@ const rand = () => SCRIPT_CHARS[Math.floor(Math.random() * SCRIPT_CHARS.length)]
 
 // ── Timing ────────────────────────────────────────────────────────────────────
 const SCRAMBLE_START = 800;                                        // all letters begin
-const SCRAMBLE_SPEED = 80;                                         // ms per swap
-const LOCK_START     = 2000;                                       // letter[0] locks
-const LOCK_GAP       = 180;                                        // ms between each lock
+const SCRAMBLE_SPEED = 60;                                         // ms per swap
+const LOCK_START     = 2500;                                       // letter[0] locks
+const LOCK_GAP       = 200;                                        // ms between each lock
 const LAST_LOCK      = LOCK_START + (LETTERS.length - 1) * LOCK_GAP; // 3980ms
 const TAGLINE_IN     = LAST_LOCK  + 300;                           // 4280ms
 const EXIT_AT        = TAGLINE_IN + 600 + 700;                     // 5580ms
@@ -131,7 +131,7 @@ export default function Loader() {
         .smk-dot { transform-box:fill-box;transform-origin:center;animation:smk-pulse 2.4s ease-in-out infinite; }
         .smk-glow{ animation:smk-glow 2.4s ease-in-out infinite; }
         @media (max-width:768px){
-          .smk-name { font-size:2.2rem !important; letter-spacing:0.14em !important; }
+          .smk-name { font-size:2.8rem !important; letter-spacing:0.14em !important; }
         }
       `}</style>
 
@@ -189,11 +189,8 @@ export default function Loader() {
               key={i}
               ref={el => { spanRefs.current[i] = el; }}
               style={{
-                display:    "inline-block",
-                width:      "1ch",        // fixed width — prevents layout shift
-                textAlign:  "center",
-                overflow:   "hidden",
-                color:      "#c9a96e",
+                display: "inline-block",
+                color:   "#c9a96e",
               }}
             >
               {letter}
