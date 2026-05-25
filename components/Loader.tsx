@@ -3,36 +3,29 @@
 import { useEffect, useRef, useState } from "react";
 
 const NAME    = "SaiManiKanta";
-const LETTERS = NAME.split(""); // ['S','a','i','M','a','n','i','K','a','n','t','a']
+const LETTERS = NAME.split("");
 
 const SCRIPT_CHARS = [
-  // Telugu
   'అ','ఆ','ఇ','ఈ','క','గ','చ','జ','ట','డ','త','ద','న','ప','బ','మ','య','ర','ల','వ',
-  // Hindi / Devanagari
   'अ','आ','क','ख','ग','घ','च','ज','ट','ड','त','द','न','प','ब','म','य','र','ल','व',
-  // Arabic
   'ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف',
-  // Japanese Katakana
   'ア','イ','ウ','エ','オ','カ','キ','ク','ケ','コ','サ','シ','ス','セ','ソ','タ','チ',
-  // Greek
   'Α','Β','Γ','Δ','Ε','Ζ','Η','Θ','Ι','Κ','Λ','Μ','Ν','Ξ','Ο','Π','Ρ','Σ','Τ','Υ',
-  // Korean
   '가','나','다','라','마','바','사','아','자','차','카','타','파','하',
-  // Latin uppercase
   'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T',
 ];
 
 const rand = () => SCRIPT_CHARS[Math.floor(Math.random() * SCRIPT_CHARS.length)];
 
 // ── Timing ────────────────────────────────────────────────────────────────────
-const SCRAMBLE_START = 800;                                        // all letters begin
-const SCRAMBLE_SPEED = 60;                                         // ms per swap
-const LOCK_START     = 2500;                                       // letter[0] locks
-const LOCK_GAP       = 200;                                        // ms between each lock
-const LAST_LOCK      = LOCK_START + (LETTERS.length - 1) * LOCK_GAP; // 3980ms
-const TAGLINE_IN     = LAST_LOCK  + 300;                           // 4280ms
-const EXIT_AT        = TAGLINE_IN + 600 + 700;                     // 5580ms
-const DONE_AT        = EXIT_AT    + 700;                           // 6280ms
+const LOGO_IN       = 1000;                                        // logo fully in
+const LETTER_CYCLE  = 400;                                         // ms per letter (scramble + lock)
+const SCRAMBLE_SPEED = 60;                                         // ms per char swap
+const FLASH_DURATION = 80;                                         // white flash ms
+const LAST_LOCK     = LOGO_IN + LETTERS.length * LETTER_CYCLE;    // 5800ms
+const TAGLINE_IN    = LAST_LOCK  + 600;                            // 6400ms
+const EXIT_AT       = TAGLINE_IN + 400 + 500;                      // 7300ms
+const DONE_AT       = EXIT_AT    + 700;                            // 8000ms
 
 export default function Loader() {
   const [visible,   setVisible]   = useState(true);
@@ -40,7 +33,6 @@ export default function Loader() {
   const [exiting,   setExiting]   = useState(false);
   const [taglineIn, setTaglineIn] = useState(false);
 
-  // One ref per letter for direct DOM access — avoids state re-renders during scramble
   const spanRefs  = useRef<(HTMLSpanElement | null)[]>([]);
   const intervals = useRef<(ReturnType<typeof setInterval> | null)[]>(
     new Array(LETTERS.length).fill(null)
@@ -53,55 +45,63 @@ export default function Loader() {
     const later = (fn: () => void, ms: number) => {
       const id = setTimeout(fn, ms);
       timers.push(id);
+      return id;
     };
 
     // Phase 1 — Logo scales in
     later(() => setLogoIn(true), 50);
 
-    // Phase 2 — All letters start scrambling at the same time
-    later(() => {
-      LETTERS.forEach((_, idx) => {
-        const span = spanRefs.current[idx];
+    // Phase 2 & 3 — One letter at a time: scramble → lock
+    LETTERS.forEach((letter, i) => {
+      const scrambleAt = LOGO_IN + i * LETTER_CYCLE;
+      const lockAt     = scrambleAt + LETTER_CYCLE;
+
+      // Show this letter and begin scrambling
+      later(() => {
+        const span = spanRefs.current[i];
         if (!span) return;
-        span.style.filter = "blur(0.5px)";
-        intervals.current[idx] = setInterval(() => {
-          const s = spanRefs.current[idx];
+
+        span.style.transition = "";
+        span.style.opacity    = "1";
+        span.style.fontSize   = "1.1em";
+        span.style.color      = "#c9a96e";
+
+        intervals.current[i] = setInterval(() => {
+          const s = spanRefs.current[i];
           if (s) s.textContent = rand();
         }, SCRAMBLE_SPEED);
-      });
-    }, SCRAMBLE_START);
+      }, scrambleAt);
 
-    // Phase 3 — Lock left → right, one by one
-    LETTERS.forEach((letter, idx) => {
+      // Lock this letter
       later(() => {
-        // Stop this letter's scramble
-        const iv = intervals.current[idx];
-        if (iv !== null) { clearInterval(iv); intervals.current[idx] = null; }
+        const iv = intervals.current[i];
+        if (iv !== null) { clearInterval(iv); intervals.current[i] = null; }
 
-        const span = spanRefs.current[idx];
+        const span = spanRefs.current[i];
         if (!span) return;
 
-        // Snap: correct char + white flash + scale pop
-        span.style.transition = "";
+        // Snap: correct char, white flash, scale pop
         span.textContent      = letter;
-        span.style.filter     = "blur(0px)";
+        span.style.transition = "";
         span.style.color      = "#ffffff";
-        span.style.transform  = "scale(1.2)";
+        span.style.transform  = "scale(1.15)";
 
-        // Settle to gold + scale back down
+        // Settle to gold + shrink back to normal size
         setTimeout(() => {
-          if (!spanRefs.current[idx]) return;
-          spanRefs.current[idx]!.style.transition = "color 0.25s ease, transform 0.2s ease";
-          spanRefs.current[idx]!.style.color      = "#c9a96e";
-          spanRefs.current[idx]!.style.transform  = "scale(1)";
-        }, 100);
-      }, LOCK_START + idx * LOCK_GAP);
+          const s = spanRefs.current[i];
+          if (!s) return;
+          s.style.transition = "color 0.15s ease, transform 0.15s ease, font-size 0.15s ease";
+          s.style.color      = "#c9a96e";
+          s.style.transform  = "scale(1)";
+          s.style.fontSize   = "1em";
+        }, FLASH_DURATION);
+      }, lockAt);
     });
 
-    // Phase 4 — Tagline appears
+    // Phase 4 — Tagline
     later(() => setTaglineIn(true), TAGLINE_IN);
 
-    // Phase 5 — Fade out, unlock scroll, unmount
+    // Phase 5 — Exit
     later(() => setExiting(true), EXIT_AT);
     later(() => {
       document.body.style.overflow = "";
@@ -120,18 +120,18 @@ export default function Loader() {
   return (
     <>
       <style>{`
-        @keyframes smk-cw     { from { transform:rotate(0deg);   } to { transform:rotate(360deg);  } }
-        @keyframes smk-ccw60  { from { transform:rotate(60deg);  } to { transform:rotate(-300deg); } }
-        @keyframes smk-cw-n60 { from { transform:rotate(-60deg); } to { transform:rotate(300deg);  } }
-        @keyframes smk-pulse  { 0%,100%{transform:scale(1);}     50%{transform:scale(1.38);}        }
-        @keyframes smk-glow   { 0%,100%{opacity:0.22;}           50%{opacity:0.58;}                 }
-        .smk-r1  { transform-box:fill-box;transform-origin:center;animation:smk-cw 10s linear infinite; }
-        .smk-r2  { transform-box:fill-box;transform-origin:center;animation:smk-ccw60 7s linear infinite; }
-        .smk-r3  { transform-box:fill-box;transform-origin:center;animation:smk-cw-n60 14s linear infinite; }
-        .smk-dot { transform-box:fill-box;transform-origin:center;animation:smk-pulse 2.4s ease-in-out infinite; }
-        .smk-glow{ animation:smk-glow 2.4s ease-in-out infinite; }
+        @keyframes smk-cw     { from{transform:rotate(0deg);}   to{transform:rotate(360deg);}  }
+        @keyframes smk-ccw60  { from{transform:rotate(60deg);}  to{transform:rotate(-300deg);} }
+        @keyframes smk-cw-n60 { from{transform:rotate(-60deg);} to{transform:rotate(300deg);}  }
+        @keyframes smk-pulse  { 0%,100%{transform:scale(1);}    50%{transform:scale(1.38);}    }
+        @keyframes smk-glow   { 0%,100%{opacity:0.22;}          50%{opacity:0.58;}              }
+        .smk-r1  {transform-box:fill-box;transform-origin:center;animation:smk-cw 10s linear infinite;}
+        .smk-r2  {transform-box:fill-box;transform-origin:center;animation:smk-ccw60 7s linear infinite;}
+        .smk-r3  {transform-box:fill-box;transform-origin:center;animation:smk-cw-n60 14s linear infinite;}
+        .smk-dot {transform-box:fill-box;transform-origin:center;animation:smk-pulse 2.4s ease-in-out infinite;}
+        .smk-glow{animation:smk-glow 2.4s ease-in-out infinite;}
         @media (max-width:768px){
-          .smk-name { font-size:2.8rem !important; letter-spacing:0.14em !important; }
+          .smk-name{font-size:2.8rem !important;letter-spacing:0.14em !important;}
         }
       `}</style>
 
@@ -169,7 +169,7 @@ export default function Loader() {
           </svg>
         </div>
 
-        {/* ── Studio name — each letter is an independent slot ── */}
+        {/* ── Studio name ── */}
         <div
           className="smk-name"
           style={{
@@ -178,6 +178,7 @@ export default function Loader() {
             fontWeight:    300,
             letterSpacing: "0.2em",
             display:       "flex",
+            alignItems:    "center",
             lineHeight:    1,
             userSelect:    "none",
             opacity:       logoIn ? 1 : 0,
@@ -189,8 +190,10 @@ export default function Loader() {
               key={i}
               ref={el => { spanRefs.current[i] = el; }}
               style={{
-                display: "inline-block",
-                color:   "#c9a96e",
+                display:        "inline-block",
+                opacity:        0,       // hidden until it's this letter's turn
+                color:          "#c9a96e",
+                verticalAlign:  "middle",
               }}
             >
               {letter}
@@ -207,7 +210,7 @@ export default function Loader() {
             textTransform: "uppercase",
             color:         "#c9a96e",
             opacity:       taglineIn ? 0.6 : 0,
-            transition:    "opacity 0.6s ease",
+            transition:    "opacity 0.4s ease",
             margin:        0,
           }}
         >
