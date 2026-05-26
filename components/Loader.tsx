@@ -1,176 +1,127 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
-const name = ['S','a','i','M','a','n','i','K','a','n','t','a'];
-const scriptChars = [
-  'అ','ఆ','क','ख','ア','イ','Α','Β','가','나',
-  'ا','ب','A','B','C','D','E','F','G','H',
-];
+import { useEffect } from "react";
 
 export default function Loader() {
-  const [visible,  setVisible]  = useState(true);
-  const loaderRef  = useRef<HTMLDivElement>(null);
-  const nameRef    = useRef<HTMLDivElement>(null);
-  const taglineRef = useRef<HTMLParagraphElement>(null);
-
   useEffect(() => {
-    document.body.style.overflow = "hidden";
+    const finalName = ['S','a','i','M','a','n','i','K','a','n','t','a'];
+    const chars = ['అ','क','ア','Α','가','ا','B','D','F','H','M','R'];
+    let lockedHTML = '';
+    let i = 0;
 
-    let cancelled      = false;
-    let activeInterval: ReturnType<typeof setInterval> | null = null;
-    const allTimers:    ReturnType<typeof setTimeout>[] = [];
+    const loaderEl    = document.getElementById('loader')         as HTMLElement;
+    const lockedDisplay = document.getElementById('locked-display') as HTMLElement;
+    const letterDisplay = document.getElementById('letter-display') as HTMLElement;
+    const taglineEl   = document.getElementById('loader-tagline') as HTMLElement;
 
-    const later = (fn: () => void, ms: number) => {
-      const id = setTimeout(() => { if (!cancelled) fn(); }, ms);
-      allTimers.push(id);
-    };
+    document.body.style.overflow = 'hidden';
 
-    // ── Direct DOM refs ──────────────────────────────────────────────────────
-    const nameEl    = nameRef.current!;
-    const taglineEl = taglineRef.current!;
-    const loaderEl  = loaderRef.current!;
+    function finish() {
+      setTimeout(() => {
+        // Fade tagline in via JS — CSS transitions are suppressed on children
+        let op = 0;
+        const fadeIn = setInterval(() => {
+          op = Math.min(op + 0.05, 1);
+          taglineEl.style.opacity = String(op);
+          if (op >= 1) clearInterval(fadeIn);
+        }, 40);
 
-    // Shared pointer to the currently scrambling span
-    let activeSpan: HTMLSpanElement | null = null;
-
-    // ── Render: locked letters + one active scrambling span ──────────────────
-    function renderDisplay(locked: string[]) {
-      nameEl.innerHTML = "";
-
-      locked.forEach(letter => {
-        const span = document.createElement("span");
-        span.textContent = letter;
-        span.style.cssText = "display:inline-block;color:#c9a96e;";
-        nameEl.appendChild(span);
-      });
-
-      activeSpan = document.createElement("span");
-      activeSpan.textContent = name[locked.length]; // initial placeholder
-      activeSpan.style.cssText = "display:inline-block;color:#c9a96e;";
-      nameEl.appendChild(activeSpan);
+        setTimeout(() => {
+          loaderEl.style.transition = 'opacity 0.8s ease';
+          loaderEl.style.opacity = '0';
+          setTimeout(() => {
+            loaderEl.style.display = 'none';
+            document.body.style.overflow = 'auto';
+          }, 800);
+        }, 900);
+      }, 700);
     }
 
-    // ── Update only the active span's text ───────────────────────────────────
-    function updateScrambleSpan(char: string) {
-      if (activeSpan) activeSpan.textContent = char;
-    }
-
-    // ── Show tagline → fade out ──────────────────────────────────────────────
-    function showTagline() {
-      later(() => {
-        taglineEl.style.transition = "opacity 500ms ease";
-        taglineEl.style.opacity    = "1";
-      }, 600);
-
-      later(() => {
-        loaderEl.style.transition = "opacity 700ms ease";
-        loaderEl.style.opacity    = "0";
-      }, 600 + 900);
-
-      later(() => {
-        document.body.style.overflow = "";
-        setVisible(false);
-      }, 600 + 900 + 700);
-    }
-
-    // ── Core loop: scramble 7 chars then lock ────────────────────────────────
-    const lockedLetters: string[] = [];
-
-    function lockNextLetter() {
-      if (cancelled) return;
-
-      if (lockedLetters.length >= name.length) {
-        showTagline();
-        return;
-      }
-
-      renderDisplay(lockedLetters);
-
-      let count = 0;
-      activeInterval = setInterval(() => {
-        if (cancelled) { clearInterval(activeInterval!); return; }
-
-        const rand = scriptChars[Math.floor(Math.random() * scriptChars.length)];
-        updateScrambleSpan(rand);
-        count++;
-
-        if (count >= 7) {
-          clearInterval(activeInterval!);
-          activeInterval = null;
-
-          // Snap to correct letter
-          if (activeSpan) {
-            activeSpan.textContent = name[lockedLetters.length];
-          }
-
-          lockedLetters.push(name[lockedLetters.length]);
-
-          later(lockNextLetter, 80);
+    function nextLetter() {
+      if (i >= finalName.length) { finish(); return; }
+      let ticks = 0;
+      const max = 8;
+      const timer = setInterval(() => {
+        const r = Math.floor(Math.random() * chars.length);
+        letterDisplay.textContent = chars[r];
+        ticks++;
+        if (ticks >= max) {
+          clearInterval(timer);
+          lockedHTML += `<span class="locked">${finalName[i]}</span>`;
+          lockedDisplay.innerHTML = lockedHTML;
+          letterDisplay.textContent = '';
+          i++;
+          setTimeout(nextLetter, 60);
         }
-      }, 70);
+      }, 65);
     }
 
-    // ── Kick off ─────────────────────────────────────────────────────────────
-    later(lockNextLetter, 300);
+    setTimeout(nextLetter, 500);
 
-    return () => {
-      cancelled = true;
-      if (activeInterval) clearInterval(activeInterval);
-      allTimers.forEach(clearTimeout);
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = 'auto'; };
   }, []);
 
-  if (!visible) return null;
-
   return (
-    <div
-      ref={loaderRef}
-      style={{
-        position:       "fixed",
-        width:          "100vw",
-        height:         "100vh",
-        background:     "#0a0a0a",
-        zIndex:         9999,
-        display:        "flex",
-        flexDirection:  "column",
-        alignItems:     "center",
-        justifyContent: "center",
-        gap:            "24px",
-      }}
-    >
-      {/* Name — rebuilt letter-by-letter via direct DOM writes */}
-      <div
-        ref={nameRef}
-        style={{
-          display:       "inline-flex",
-          alignItems:    "baseline",
-          fontFamily:    "'Cormorant Garamond', 'Noto Sans', serif",
-          fontSize:      "clamp(1.8rem, 5vw, 3.5rem)",
-          fontWeight:    400,
-          letterSpacing: "0.12em",
-          color:         "#c9a96e",
-          overflow:      "hidden",
-        }}
-      />
-
-      {/* Tagline — starts invisible, fades in after all letters lock */}
-      <p
-        ref={taglineRef}
-        style={{
-          fontFamily:    "'Inter', sans-serif",
-          fontSize:      "clamp(0.5rem, 2vw, 0.7rem)",
-          fontWeight:    300,
-          letterSpacing: "0.35em",
-          textTransform: "uppercase",
-          color:         "rgba(201,169,110,0.6)",
-          opacity:       0,
-          margin:        0,
-        }}
-      >
-        Wedding &amp; Portrait Photography
-      </p>
-    </div>
+    <>
+      <style>{`
+        #loader {
+          position: fixed;
+          inset: 0;
+          background: #0a0a0a;
+          z-index: 9999;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+        }
+        #loader * {
+          animation: none !important;
+          transform: none !important;
+          transition: none !important;
+        }
+        #locked-display {
+          display: flex;
+          flex-direction: row;
+          gap: 4px;
+          font-family: 'Cormorant Garamond', serif;
+          font-size: clamp(2rem, 6vw, 4rem);
+          font-weight: 400;
+          color: #c9a96e;
+          letter-spacing: 0.15em;
+          min-height: 1.2em;
+        }
+        #letter-display {
+          display: inline-block;
+          text-align: center;
+          font-family: 'Cormorant Garamond', serif;
+          font-size: clamp(2rem, 6vw, 4rem);
+          font-weight: 400;
+          color: #c9a96e;
+          letter-spacing: 0.15em;
+          min-height: 1.2em;
+          min-width: 1em;
+        }
+        .locked {
+          display: inline-block;
+          animation: none !important;
+          transform: none !important;
+          transition: none !important;
+        }
+        #loader-tagline {
+          font-family: 'Inter', sans-serif;
+          font-size: clamp(0.5rem, 2vw, 0.7rem);
+          letter-spacing: 0.35em;
+          color: rgba(201, 169, 110, 0.6);
+          text-transform: uppercase;
+          opacity: 0;
+        }
+      `}</style>
+      <div id="loader">
+        <div id="locked-display" />
+        <div id="letter-display" />
+        <div id="loader-tagline">WEDDING &amp; PORTRAIT PHOTOGRAPHY</div>
+      </div>
+    </>
   );
 }
