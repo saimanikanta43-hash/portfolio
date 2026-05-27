@@ -19,12 +19,12 @@ interface Video {
 const ALL_VIDEOS: Video[] = [
   {
     id: 1,
-    title: "Priya & Arjun",
+    title: "PIa & Arjun",
     category: "Weddings",
     duration: "4:32",
     year: "2024",
     thumbnail: "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=85&auto=format",
-    watermark: "© ManiKanta",
+    watermark: "© Nayanam",
   },
   {
     id: 2,
@@ -33,7 +33,7 @@ const ALL_VIDEOS: Video[] = [
     duration: "2:18",
     year: "2024",
     thumbnail: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=1200&q=85&auto=format",
-    watermark: "© ManiKanta",
+    watermark: "© Nayanam",
   },
   {
     id: 3,
@@ -42,7 +42,7 @@ const ALL_VIDEOS: Video[] = [
     duration: "3:15",
     year: "2024",
     thumbnail: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1200&q=85&auto=format",
-    watermark: "© ManiKanta",
+    watermark: "© Nayanam",
   },
   {
     id: 4,
@@ -51,7 +51,7 @@ const ALL_VIDEOS: Video[] = [
     duration: "6:05",
     year: "2024",
     thumbnail: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=1200&q=85&auto=format",
-    watermark: "© ManiKanta",
+    watermark: "© Nayanam",
   },
   {
     id: 5,
@@ -60,7 +60,7 @@ const ALL_VIDEOS: Video[] = [
     duration: "2:40",
     year: "2023",
     thumbnail: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&q=85&auto=format",
-    watermark: "© ManiKanta",
+    watermark: "© Nayanam",
   },
   {
     id: 6,
@@ -69,7 +69,7 @@ const ALL_VIDEOS: Video[] = [
     duration: "1:55",
     year: "2023",
     thumbnail: "https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=1200&q=85&auto=format",
-    watermark: "© ManiKanta",
+    watermark: "© Nayanam",
   },
 ];
 

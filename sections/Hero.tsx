@@ -109,7 +109,7 @@ export default function Hero() {
             transition:    "opacity 0.9s ease, transform 0.9s cubic-bezier(0.16,1,0.3,1)",
           }}
         >
-          SaiManiKanta
+          Stories by Nayanam
         </h1>
 
         <div

@@ -36,7 +36,7 @@ export default function HeroTitle() {
             whiteSpace: "nowrap",
           }}
         >
-          SaiManiKanta
+          Stories by Nayanam
         </motion.p>
       </div>
     </motion.div>

@@ -1,127 +1,143 @@
-"use client";
+'use client'
+import { useEffect, useRef } from 'react'
 
-import { useEffect } from "react";
+const FINAL_NAME = ['N','A','Y','A','N','A','M']
+const CHARS = [
+  'అ','ఆ','క','గ','చ',
+  'क','ख','ग','घ','च',
+  'ア','イ','ウ','カ','サ',
+  'Α','Β','Γ','Δ','Λ',
+  '가','나','다','라','마',
+  'ا','ب','ت','ج','ح'
+]
 
-export default function Loader() {
+export default function Loader({ onComplete }: { onComplete: () => void }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const taglineRef   = useRef<HTMLParagraphElement>(null)
+
   useEffect(() => {
-    const finalName = ['S','a','i','M','a','n','i','K','a','n','t','a'];
-    const chars = ['అ','क','ア','Α','가','ا','B','D','F','H','M','R'];
-    let lockedHTML = '';
-    let i = 0;
+    const container = containerRef.current
+    if (!container) return
 
-    const loaderEl    = document.getElementById('loader')         as HTMLElement;
-    const lockedDisplay = document.getElementById('locked-display') as HTMLElement;
-    const letterDisplay = document.getElementById('letter-display') as HTMLElement;
-    const taglineEl   = document.getElementById('loader-tagline') as HTMLElement;
+    // Create one span per letter — all hidden initially
+    const spans: HTMLSpanElement[] = []
+    FINAL_NAME.forEach(() => {
+      const span = document.createElement('span')
+      span.style.cssText = `
+        display: inline-block;
+        min-width: 0.6em;
+        text-align: center;
+        visibility: hidden;
+        color: #c9a96e;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(2rem, 6vw, 4.5rem);
+        letter-spacing: 0.15em;
+        font-weight: 400;
+        line-height: 1;
+      `
+      container.appendChild(span)
+      spans.push(span)
+    })
 
-    document.body.style.overflow = 'hidden';
-
-    function finish() {
-      setTimeout(() => {
-        // Fade tagline in via JS — CSS transitions are suppressed on children
-        let op = 0;
-        const fadeIn = setInterval(() => {
-          op = Math.min(op + 0.05, 1);
-          taglineEl.style.opacity = String(op);
-          if (op >= 1) clearInterval(fadeIn);
-        }, 40);
-
-        setTimeout(() => {
-          loaderEl.style.transition = 'opacity 0.8s ease';
-          loaderEl.style.opacity = '0';
+    function scrambleLetter(index: number) {
+      if (index >= FINAL_NAME.length) {
+        // Fade in tagline
+        const tagline = taglineRef.current
+        if (tagline) {
           setTimeout(() => {
-            loaderEl.style.display = 'none';
-            document.body.style.overflow = 'auto';
-          }, 800);
-        }, 900);
-      }, 700);
-    }
-
-    function nextLetter() {
-      if (i >= finalName.length) { finish(); return; }
-      let ticks = 0;
-      const max = 8;
-      const timer = setInterval(() => {
-        const r = Math.floor(Math.random() * chars.length);
-        letterDisplay.textContent = chars[r];
-        ticks++;
-        if (ticks >= max) {
-          clearInterval(timer);
-          lockedHTML += `<span class="locked">${finalName[i]}</span>`;
-          lockedDisplay.innerHTML = lockedHTML;
-          letterDisplay.textContent = '';
-          i++;
-          setTimeout(nextLetter, 60);
+            tagline.style.transition = 'opacity 500ms ease'
+            tagline.style.opacity    = '1'
+          }, 200)
         }
-      }, 65);
+
+        // Fade out loader
+        setTimeout(() => {
+          const loader = document.getElementById('smk-loader')
+          if (loader) {
+            loader.style.transition = 'opacity 0.5s ease'
+            loader.style.opacity    = '0'
+            setTimeout(() => {
+              loader.style.display = 'none'
+              document.body.style.overflow = 'auto'
+              onComplete()
+            }, 500)
+          }
+        }, 400)
+        return
+      }
+
+      const span = spans[index]
+      span.style.visibility = 'visible'
+
+      let ticks = 0
+      const totalTicks = 6
+
+      const interval = setInterval(() => {
+        const rand = CHARS[Math.floor(Math.random() * CHARS.length)]
+        span.textContent      = rand
+        span.style.color      = '#e8c060'
+        span.style.textShadow = '0 0 8px rgba(201,169,110,0.8)'
+        ticks++
+
+        if (ticks >= totalTicks) {
+          clearInterval(interval)
+          span.textContent      = FINAL_NAME[index]
+          span.style.color      = '#c9a96e'
+          span.style.textShadow = 'none'
+          // Brief flash
+          span.style.color = '#ffffff'
+          setTimeout(() => {
+            span.style.color = '#c9a96e'
+            // Start next letter
+            setTimeout(() => scrambleLetter(index + 1), 40)
+          }, 50)
+        }
+      }, 40)
     }
 
-    setTimeout(nextLetter, 500);
+    document.body.style.overflow = 'hidden'
+    setTimeout(() => scrambleLetter(0), 200)
 
-    return () => { document.body.style.overflow = 'auto'; };
-  }, []);
+    return () => {}
+  }, [onComplete])
 
   return (
-    <>
-      <style>{`
-        #loader {
-          position: fixed;
-          inset: 0;
-          background: #0a0a0a;
-          z-index: 9999;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 16px;
-        }
-        #loader * {
-          animation: none !important;
-          transform: none !important;
-          transition: none !important;
-        }
-        #locked-display {
-          display: flex;
-          flex-direction: row;
-          gap: 4px;
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(2rem, 6vw, 4rem);
-          font-weight: 400;
-          color: #c9a96e;
-          letter-spacing: 0.15em;
-          min-height: 1.2em;
-        }
-        #letter-display {
-          display: inline-block;
-          text-align: center;
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(2rem, 6vw, 4rem);
-          font-weight: 400;
-          color: #c9a96e;
-          letter-spacing: 0.15em;
-          min-height: 1.2em;
-          min-width: 1em;
-        }
-        .locked {
-          display: inline-block;
-          animation: none !important;
-          transform: none !important;
-          transition: none !important;
-        }
-        #loader-tagline {
-          font-family: 'Inter', sans-serif;
-          font-size: clamp(0.5rem, 2vw, 0.7rem);
-          letter-spacing: 0.35em;
-          color: rgba(201, 169, 110, 0.6);
-          text-transform: uppercase;
-          opacity: 0;
-        }
-      `}</style>
-      <div id="loader">
-        <div id="locked-display" />
-        <div id="letter-display" />
-        <div id="loader-tagline">WEDDING &amp; PORTRAIT PHOTOGRAPHY</div>
-      </div>
-    </>
-  );
+    <div
+      id="smk-loader"
+      style={{
+        position:        'fixed',
+        inset:           0,
+        background:      '#0a0a0a',
+        zIndex:          9999,
+        display:         'flex',
+        flexDirection:   'column',
+        alignItems:      'center',
+        justifyContent:  'center',
+      }}
+    >
+      <div
+        ref={containerRef}
+        style={{
+          display:        'flex',
+          flexDirection:  'row',
+          alignItems:     'baseline',
+        }}
+      />
+      <p
+        ref={taglineRef}
+        style={{
+          fontFamily:    "'Inter', sans-serif",
+          fontSize:      '0.65rem',
+          letterSpacing: '0.35em',
+          color:         'rgba(201,169,110,0.5)',
+          textTransform: 'uppercase',
+          marginTop:     '1.5rem',
+          opacity:       0,
+          margin:        '1.5rem 0 0',
+        }}
+      >
+        Wedding &amp; Portrait Photography
+      </p>
+    </div>
+  )
 }

@@ -74,7 +74,7 @@ export default function Navbar() {
             transition:    "color 0.5s ease",
           }}
         >
-          SMK
+          Stories by Nayanam
         </button>
 
         {/* Desktop nav links */}

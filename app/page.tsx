@@ -14,7 +14,7 @@ export default function Home() {
       {/* Fixed overlays */}
       <div className="grain" aria-hidden="true" />
       <div className="vignette" aria-hidden="true" />
-      <Loader />
+      <Loader onComplete={() => {}} />
 
       {/* Navigation */}
       <Navbar />

@@ -115,7 +115,7 @@ export default function Contact() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <a
-                href="mailto:manikanta@photography.com"
+                href="mailto:nayanam@photography.com"
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -153,12 +153,12 @@ export default function Contact() {
                     transition: "color 0.3s ease",
                   }}
                 >
-                  manikanta@photography.com
+                  nayanam@photography.com
                 </span>
               </a>
 
               <a
-                href="https://instagram.com/saimanikantaaa"
+                href="https://instagram.com/storiesbynayanam"
                 target="_blank"
                 rel="noreferrer"
                 style={{ display: "flex", alignItems: "center", gap: 16 }}
@@ -195,7 +195,7 @@ export default function Contact() {
                     transition: "color 0.3s ease",
                   }}
                 >
-                  @saimanikantaaa
+                  @storiesbynayanam
                 </span>
               </a>
             </div>

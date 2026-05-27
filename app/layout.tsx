@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ManiKanta — Visual Storyteller & Photographer",
+  title: "Stories by Nayanam — Visual Storyteller & Photographer",
   description:
-    "Cinematic photography portfolio of ManiKanta. Visual storytelling through light, shadow, and emotion.",
+    "Cinematic photography portfolio of nayanam. Visual storytelling through light, shadow, and emotion.",
   openGraph: {
-    title: "ManiKanta — Visual Storyteller & Photographer",
-    description: "Cinematic photography portfolio.",
+    title: "Stories by Nayanam — Visual Storyteller & Photographer",
+    description: "Cinematic photography portfolio by nayanam.",
     type: "website",
   },
 };

@@ -56,7 +56,7 @@ export default function About() {
               margin: 0,
             }}
           >
-            I'm SaiManiKanta.
+            I'm Nayanam.
           </motion.h2>
         </div>
         <div style={{ overflow: "hidden" }}>
