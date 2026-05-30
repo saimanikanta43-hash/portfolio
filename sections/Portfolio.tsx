@@ -54,12 +54,14 @@ const TOTAL          = PORTFOLIO_SLIDES.length;
 // ─── Mobile swipeable card carousel ────────────────────────────────────────
 
 function MobileCarousel() {
-  const [activeIndex,     setActiveIndex]     = useState(0);
-  const [selectedFilter,  setSelectedFilter]  = useState("WEDDINGS");
+  const [activeIndex,    setActiveIndex]    = useState(0);
+  const [selectedFilter, setSelectedFilter] = useState("WEDDINGS");
+  const [tappedIndex,    setTappedIndex]    = useState<number | null>(null);
 
-  const startXRef     = useRef(0);
-  const isDragging    = useRef(false);
-  const wasSwipe      = useRef(false);
+  const startXRef   = useRef(0);
+  const isDragging  = useRef(false);
+  const wasSwipe    = useRef(false);
+  const tappedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const navigate = (i: number) => {
     const idx = Math.max(0, Math.min(i, TOTAL - 1));
@@ -93,9 +95,15 @@ function MobileCarousel() {
 
   const handleCardClick = (i: number) => {
     if (wasSwipe.current) { wasSwipe.current = false; return; }
-    if (i !== activeIndex) { navigate(i); }
-    // tapping the active card does nothing beyond navigation (photos shown in full color)
+    // Navigate if not the active card
+    if (i !== activeIndex) navigate(i);
+    // Any tap reveals colour for 2 s then returns to B&W
+    if (tappedTimer.current) clearTimeout(tappedTimer.current);
+    setTappedIndex(i);
+    tappedTimer.current = setTimeout(() => setTappedIndex(null), 2000);
   };
+
+  useEffect(() => () => { if (tappedTimer.current) clearTimeout(tappedTimer.current); }, []);
 
   // translateX: step = cardWidth + gap = (100vw - 80px) + 16px = 100vw - 64px
   // offset:     40px left peek
@@ -172,7 +180,7 @@ function MobileCarousel() {
                   style={{
                     flexShrink:  0,
                     width:       "calc(100vw - 80px)",
-                    height:      "65vh",
+                    height:      "60vh",
                     borderRadius: 8,
                     overflow:    "hidden",
                     position:    "relative",
@@ -182,11 +190,17 @@ function MobileCarousel() {
                     cursor:      "pointer",
                   }}
                 >
-                  {/* Photo */}
+                  {/* Photo — B&W by default, colour on tap for 2 s */}
                   <img
                     src={slide.imageUrl}
                     alt={slide.title}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    style={{
+                      width:      "100%",
+                      height:     "100%",
+                      objectFit:  "cover",
+                      filter:     tappedIndex === i ? "grayscale(0%)" : "grayscale(100%)",
+                      transition: "filter 0.6s ease",
+                    }}
                   />
 
                   {/* Dual gradient — dark top + dark bottom */}
@@ -383,7 +397,7 @@ export default function Portfolio() {
   return (
     <section id="work">
       <HoverSlider
-        className="min-h-screen bg-[#0a0a0a] text-[#f5f0e8] flex flex-col justify-center"
+        className="min-h-screen bg-[#0a0a0a] text-[#f5f0e8] flex flex-col justify-center portfolio-section"
         style={{ padding: "96px 5%" }}
       >
 
@@ -397,7 +411,7 @@ export default function Portfolio() {
             className="text-[#c9a96e] text-xs tracking-[0.3em] uppercase mb-2"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
-            Selected Work
+            Our Work
           </motion.p>
 
           {/* Short gold line — mobile only (via globals.css) */}
@@ -408,7 +422,7 @@ export default function Portfolio() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             viewport={{ once: true }}
-            className="text-5xl md:text-7xl text-[#f5f0e8] mb-8 md:mb-16"
+            className="text-4xl md:text-7xl text-[#f5f0e8] mb-6 md:mb-16"
             style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400, lineHeight: 1 }}
           >
             The Portfolio

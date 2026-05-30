@@ -103,6 +103,8 @@ button {
   .portfolio-desktop-content { display: none !important; }
   .portfolio-mobile-carousel { display: block; }
   .portfolio-mobile-divider  { display: block; }
+  /* Compact vertical rhythm on mobile */
+  .portfolio-section { padding-top: 60px !important; padding-bottom: 60px !important; }
 }
 
 /* Portfolio scroll snap */
