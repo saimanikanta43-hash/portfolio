@@ -9,40 +9,50 @@ import {
 } from "@/components/ui/animated-slideshow";
 import { motion } from "framer-motion";
 
+// ── Drop your photos into public/images/portfolio/<category>/ ──────────────
+// Name the cover image for each section "01.jpg" (or .webp / .png).
+// Additional images go as 02.jpg, 03.jpg … — they'll be used in future galleries.
+// The fallbackUrl is shown only while the local file is missing.
+
 const PORTFOLIO_SLIDES = [
   {
-    id:       "weddings",
-    title:    "Weddings",
-    imageUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80",
-    count:    "24 stories",
-    tagline:  "Every vow spoken in silence, every tear that said what words couldn't.",
+    id:          "weddings",
+    title:       "Weddings",
+    imageUrl:    "/images/portfolio/weddings/01.jpg",
+    fallbackUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80",
+    count:       "24 stories",
+    tagline:     "Every vow spoken in silence, every tear that said what words couldn't.",
   },
   {
-    id:       "couples",
-    title:    "Couple Portraits",
-    imageUrl: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&q=80",
-    count:    "18 sessions",
-    tagline:  "Two people, one frame — a story written in glances.",
+    id:          "couples",
+    title:       "Couple Portraits",
+    imageUrl:    "/images/portfolio/couples/01.jpg",
+    fallbackUrl: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&q=80",
+    count:       "18 sessions",
+    tagline:     "Two people, one frame — a story written in glances.",
   },
   {
-    id:       "maternity",
-    title:    "Maternity",
-    imageUrl: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=800&q=80",
-    count:    "12 sessions",
-    tagline:  "The last quiet before everything beautiful begins.",
+    id:          "maternity",
+    title:       "Maternity",
+    imageUrl:    "/images/portfolio/maternity/01.jpg",
+    fallbackUrl: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=800&q=80",
+    count:       "12 sessions",
+    tagline:     "The last quiet before everything beautiful begins.",
   },
   {
-    id:       "events",
-    title:    "Events",
-    imageUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
-    count:    "30 events",
-    tagline:  "The details everyone feels, but only you will remember.",
+    id:          "events",
+    title:       "Events",
+    imageUrl:    "/images/portfolio/events/01.jpg",
+    fallbackUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
+    count:       "30 events",
+    tagline:     "The details everyone feels, but only you will remember.",
   },
   {
-    id:       "conceptual",
-    title:    "Conceptual",
-    imageUrl: "https://images.unsplash.com/photo-1460978812857-470ed1c77af0?w=800&q=80",
-    count:    "8 projects",
+    id:          "conceptual",
+    title:       "Conceptual",
+    imageUrl:    "/images/portfolio/conceptual/01.jpg",
+    fallbackUrl: "https://images.unsplash.com/photo-1460978812857-470ed1c77af0?w=800&q=80",
+    count:       "8 projects",
     tagline:  "Images that live somewhere between memory and dream.",
   },
 ];
@@ -194,6 +204,7 @@ function MobileCarousel() {
                   <img
                     src={slide.imageUrl}
                     alt={slide.title}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = slide.fallbackUrl }}
                     style={{
                       width:      "100%",
                       height:     "100%",
@@ -488,6 +499,7 @@ export default function Portfolio() {
                 index={index}
                 imageUrl={slide.imageUrl}
                 src={slide.imageUrl}
+                onError={(e: React.SyntheticEvent<HTMLImageElement>) => { e.currentTarget.src = slide.fallbackUrl }}
                 alt={slide.title}
                 className="w-full h-full object-cover"
                 style={{ filter: "grayscale(30%)" }}
