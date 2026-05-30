@@ -19,13 +19,14 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
     const container = containerRef.current
     if (!container) return
 
-    // Create one span per letter — all hidden initially
+    // Create all spans with final letters pre-set so the container
+    // has its full width from the first frame — no layout shift possible
     const spans: HTMLSpanElement[] = []
-    FINAL_NAME.forEach(() => {
+    FINAL_NAME.forEach((letter) => {
       const span = document.createElement('span')
+      span.textContent = letter
       span.style.cssText = `
         display: inline-block;
-        min-width: 0.6em;
         text-align: center;
         visibility: hidden;
         color: #c9a96e;
@@ -96,7 +97,13 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
     }
 
     document.body.style.overflow = 'hidden'
-    setTimeout(() => scrambleLetter(0), 200)
+    requestAnimationFrame(() => {
+      spans.forEach(span => {
+        const w = span.getBoundingClientRect().width
+        span.style.width = `${w}px`
+      })
+      setTimeout(() => scrambleLetter(0), 200)
+    })
 
     return () => {}
   }, [onComplete])
