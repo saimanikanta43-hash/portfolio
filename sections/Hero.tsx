@@ -1,77 +1,48 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
-
 export default function Hero() {
-  const [skylineIn, setSkylineIn] = useState(false);
-  const [textIn,    setTextIn]    = useState(false);
-  const [lineIn,    setLineIn]    = useState(false);
-  const skylineInnerRef           = useRef<HTMLDivElement>(null);
-  const loadDone                  = useRef(false);
-  const rafRef                    = useRef<number>(0);
-
-  // Load sequence
-  useEffect(() => {
-    const t1 = setTimeout(() => setSkylineIn(true),        400);
-    const t2 = setTimeout(() => setTextIn(true),          1000);
-    const t3 = setTimeout(() => setLineIn(true),          1500);
-    const t4 = setTimeout(() => { loadDone.current = true; }, 2300);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
-  }, []);
-
-  // Scroll parallax via RAF
-  useEffect(() => {
-    const tick = () => {
-      if (loadDone.current && skylineInnerRef.current) {
-        const y     = window.scrollY;
-        const ty    = -(y * 0.4);
-        const scale = Math.max(0.97, 1 - y * 0.00006);
-        skylineInnerRef.current.style.transform = `translateY(${ty}px) scale(${scale})`;
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, []);
-
   return (
     <section
       id="hero"
-      style={{
-        position:   "relative",
-        height:     "100vh",
-        background: "#0a0a0a",
-        overflow:   "hidden",
-      }}
+      style={{ position: "relative", height: "100vh", background: "#080808", overflow: "hidden" }}
     >
-      {/* ── Keyframes + mobile overrides ── */}
       <style>{`
+        @keyframes ringPulse {
+          0%, 100% { opacity: 0.35; }
+          50%       { opacity: 0.7; }
+        }
+        @keyframes spinCW {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        @keyframes spinCCW {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(-360deg); }
+        }
+        @keyframes breathe {
+          0%, 100% { filter: drop-shadow(0 0 8px rgba(201,169,110,0.35)); }
+          50%       { filter: drop-shadow(0 0 24px rgba(201,169,110,0.7)); }
+        }
         @keyframes hero-bounce {
-          0%, 100% { transform: translateY(0);  }
+          0%, 100% { transform: translateY(0); }
           50%       { transform: translateY(7px); }
         }
+
+        /* Logo animations — opacity starts at 0 via globals.css, revealed by JS crossfade */
+        #hero-logo-mark      { animation: breathe 4s ease-in-out 0s infinite; }
+        #hero-logo-mark .tri-outer { animation: spinCW  18s linear infinite; transform-origin: 60px 60px; }
+        #hero-logo-mark .tri-inner { animation: spinCCW 12s linear infinite; transform-origin: 60px 60px; }
+        #hero-logo-mark .iris-ring { animation: ringPulse 3.5s ease-in-out 0s infinite; }
+
         .hero-scroll { animation: hero-bounce 2.2s ease-in-out infinite; }
 
         @media (max-width: 768px) {
-          .hero-text-block  { top: 30% !important; }
-          .hero-name        { font-size: 2.8rem !important; }
-          .hero-skyline-img { min-height: 45vh; object-fit: cover; object-position: center bottom; }
-          .hero-scroll-pos  { bottom: auto !important; top: 70% !important; }
-          .hero-scroll-label{ font-size: 0.65rem !important; }
+          .hero-wordmark-text { font-size: clamp(1.6rem, 7vw, 2.4rem) !important; }
         }
       `}</style>
 
-      {/* ── SVG grain noise overlay ── */}
+      {/* SVG grain */}
       <svg
         aria-hidden
-        style={{
-          position:      "absolute",
-          inset:         0,
-          width:         "100%",
-          height:        "100%",
-          pointerEvents: "none",
-          zIndex:        10,
-        }}
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 10 }}
       >
         <filter id="hg">
           <feTurbulence type="fractalNoise" baseFrequency="0.68" numOctaves="3" stitchTiles="stitch" />
@@ -80,168 +51,131 @@ export default function Hero() {
         <rect width="100%" height="100%" filter="url(#hg)" opacity="0.042" />
       </svg>
 
-      {/* ── Center text block ── */}
-      <div
-        className="hero-text-block"
+      {/* Eye mark — matches loader logo position exactly for seamless crossfade */}
+      <svg
+        id="hero-logo-mark"
+        width="120" height="120" viewBox="0 0 120 120"
+        fill="none" xmlns="http://www.w3.org/2000/svg"
         style={{
           position:  "absolute",
-          top:       "35%",
+          top:       "40%",
           left:      "50%",
           transform: "translate(-50%, -50%)",
-          textAlign: "center",
           zIndex:    5,
-          width:     "100%",
-          padding:   "0 24px",
         }}
       >
-        <h1
-          className="hero-name"
-          style={{
-            fontFamily:    "'Cormorant Garamond', serif",
-            fontSize:      "clamp(2.6rem, 6vw, 6rem)",
-            fontWeight:    300,
-            color:         "#f5f0e8",
-            letterSpacing: "0.08em",
-            margin:        0,
-            lineHeight:    1,
-            opacity:       textIn ? 1 : 0,
-            transform:     textIn ? "translateY(0)" : "translateY(24px)",
-            transition:    "opacity 0.9s ease, transform 0.9s cubic-bezier(0.16,1,0.3,1)",
-          }}
-        >
-          Stories by Nayanam
-        </h1>
+        <path d="M8,60 Q60,8 112,60 Q60,112 8,60 Z"
+              fill="none" stroke="#c9a96e" strokeWidth="1"/>
+        <circle className="iris-ring" cx="60" cy="60" r="28"
+                fill="none" stroke="#c9a96e" strokeWidth="0.7" opacity="0.35"/>
+        <circle cx="60" cy="60" r="22"
+                fill="none" stroke="#c9a96e" strokeWidth="1"/>
+        <g className="tri-outer">
+          <polygon points="60,38 79,71 41,71"
+                   fill="none" stroke="#c9a96e" strokeWidth="0.9"/>
+        </g>
+        <g className="tri-inner">
+          <polygon points="60,82 41,49 79,49"
+                   fill="none" stroke="#c9a96e" strokeWidth="0.7" opacity="0.55"/>
+        </g>
+        <circle cx="60" cy="60" r="10"
+                fill="none" stroke="#c9a96e" strokeWidth="0.6" opacity="0.4"/>
+        <circle cx="60" cy="60" r="4" fill="#c9a96e"/>
+        <circle cx="63" cy="57" r="1.4" fill="#fff" opacity="0.9"/>
+        <circle cx="8"   cy="60" r="2" fill="#c9a96e" opacity="0.6"/>
+        <circle cx="112" cy="60" r="2" fill="#c9a96e" opacity="0.6"/>
+        <line x1="60" y1="32" x2="60" y2="36" stroke="#c9a96e" strokeWidth="0.7" opacity="0.4"/>
+        <line x1="60" y1="84" x2="60" y2="88" stroke="#c9a96e" strokeWidth="0.7" opacity="0.4"/>
+        <line x1="32" y1="60" x2="36" y2="60" stroke="#c9a96e" strokeWidth="0.7" opacity="0.4"/>
+        <line x1="84" y1="60" x2="88" y2="60" stroke="#c9a96e" strokeWidth="0.7" opacity="0.4"/>
+      </svg>
 
-        <div
-          style={{
-            display:    "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap:        "14px",
-            margin:     "18px 0 0",
-            opacity:    textIn ? 0.85 : 0,
-            transform:  textIn ? "translateY(0)" : "translateY(16px)",
-            transition: "opacity 0.9s ease 0.12s, transform 0.9s cubic-bezier(0.16,1,0.3,1) 0.12s",
-          }}
-        >
-          <div style={{ width: 30, height: 1, background: "#c9a96e", flexShrink: 0 }} />
-          <p
+      {/* Text group — positioned below logo, revealed staggered via body.hero-revealed */}
+      <div
+        style={{
+          position:      "absolute",
+          top:           "calc(40% + 76px)",
+          left:          "50%",
+          transform:     "translateX(-50%)",
+          textAlign:     "center",
+          zIndex:        5,
+          display:       "flex",
+          flexDirection: "column",
+          alignItems:    "center",
+          gap:           "20px",
+          width:         "100%",
+          padding:       "0 24px",
+        }}
+      >
+        {/* Wordmark + divider */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+          <span
+            className="hero-name hero-wordmark-text"
             style={{
-              fontFamily:    "'Inter', sans-serif",
-              fontSize:      "clamp(0.55rem, 0.85vw, 0.85rem)",
+              fontFamily:    "'Cormorant Garamond', serif",
+              fontSize:      "clamp(2rem, 5.5vw, 4rem)",
               fontWeight:    300,
-              letterSpacing: "0.25em",
-              textTransform: "uppercase",
-              color:         "#c9a96e",
-              margin:        0,
+              fontStyle:     "italic",
+              color:         "#f5f0e8",
+              lineHeight:    1,
+              letterSpacing: "0.02em",
+              whiteSpace:    "nowrap",
             }}
           >
-            Wedding &amp; Portrait Photography
-          </p>
-          <div style={{ width: 30, height: 1, background: "#c9a96e", flexShrink: 0 }} />
-        </div>
+            Stories by Nayanam
+          </span>
 
-        {/* Gold rule */}
-        <div
-          style={{
-            width:      lineIn ? 50 : 0,
-            height:     1,
-            background: "#c9a96e",
-            margin:     "22px auto 0",
-            opacity:    0.75,
-            transition: "width 1s cubic-bezier(0.16,1,0.3,1)",
-          }}
-        />
-      </div>
-
-      {/* ── Skyline: clip-path sweep wrapper ── */}
-      <div
-        style={{
-          position:   "absolute",
-          bottom:     0,
-          left:       0,
-          right:      0,
-          clipPath:   skylineIn ? "inset(0 0% 0 0)" : "inset(0 100% 0 0)",
-          opacity:    skylineIn ? 1 : 0,
-          transition: "clip-path 2s cubic-bezier(0.16,1,0.3,1), opacity 1.8s ease",
-        }}
-      >
-        {/* Inner: parallax + scale driven by RAF */}
-        <div
-          ref={skylineInnerRef}
-          style={{
-            transformOrigin: "bottom center",
-            willChange:      "transform",
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/skyline.svg"
-            alt=""
-            aria-hidden
-            className="hero-skyline-img"
-            style={{ width: "100%", display: "block" }}
+          <div
+            className="hero-divider"
+            style={{
+              width:      240,
+              height:     1,
+              background: "linear-gradient(to right, transparent, rgba(201,169,110,0.35), transparent)",
+            }}
           />
         </div>
+
+        {/* Tagline */}
+        <span
+          className="hero-tagline"
+          style={{
+            fontFamily:    "'Inter', sans-serif",
+            fontSize:      "0.52rem",
+            fontWeight:    400,
+            letterSpacing: "0.45em",
+            color:         "#c9a96e",
+            textTransform: "uppercase",
+          }}
+        >
+          Wedding &amp; Portrait Photography
+        </span>
       </div>
 
-      {/* ── Bottom fade — anchors skyline into hero background ── */}
-      <div
-        style={{
-          position:      "absolute",
-          bottom:        0,
-          left:          0,
-          right:         0,
-          height:        "22%",
-          background:    "linear-gradient(to top, #0f0f0f 0%, transparent 100%)",
-          pointerEvents: "none",
-          zIndex:        3,
-        }}
-      />
-
-      {/* ── Section transition — bleeds hero into portfolio ── */}
-      <div
-        style={{
-          position:      "absolute",
-          bottom:        0,
-          left:          0,
-          right:         0,
-          height:        "30%",
-          background:    "linear-gradient(to bottom, transparent 70%, #0f0f0f 100%)",
-          pointerEvents: "none",
-          zIndex:        5,
-        }}
-      />
-
-      {/* ── Radial vignette ── */}
+      {/* Radial vignette */}
       <div
         style={{
           position:      "absolute",
           inset:         0,
-          background:    "radial-gradient(ellipse at center, transparent 38%, rgba(0,0,0,0.55) 100%)",
+          background:    "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%)",
           pointerEvents: "none",
           zIndex:        4,
         }}
       />
 
-      {/* ── Scroll indicator ── */}
-      {/* Outer: handles position only; inner: handles bounce only (keeps transforms separate) */}
+      {/* Scroll indicator — revealed via body.hero-revealed */}
       <div
-        className="hero-scroll-pos"
+        className="hero-scroll-wrap"
         style={{
-          position:   "absolute",
-          bottom:     36,
-          left:       "50%",
-          transform:  "translateX(-50%)",
-          textAlign:  "center",
-          zIndex:     6,
-          opacity:    textIn ? 0.65 : 0,
-          transition: "opacity 1s ease 0.6s",
+          position:  "absolute",
+          bottom:    36,
+          left:      "50%",
+          transform: "translateX(-50%)",
+          textAlign: "center",
+          zIndex:    6,
         }}
       >
         <div className="hero-scroll">
           <p
-            className="hero-scroll-label"
             style={{
               fontFamily:    "'Inter', sans-serif",
               fontSize:      "0.52rem",
@@ -259,5 +193,5 @@ export default function Hero() {
         </div>
       </div>
     </section>
-  );
+  )
 }
