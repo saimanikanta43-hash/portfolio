@@ -93,11 +93,16 @@ button {
 }
 
 /* Portfolio responsive — desktop list hidden on mobile, carousel hidden on desktop */
-.portfolio-mobile-carousel { display: none; }
+.portfolio-mobile-carousel  { display: none; }
+.portfolio-mobile-divider   { display: none; }
+
+/* Hide webkit scrollbar on filter pill strip */
+.portfolio-filter-scroll::-webkit-scrollbar { display: none; }
 
 @media (max-width: 768px) {
   .portfolio-desktop-content { display: none !important; }
   .portfolio-mobile-carousel { display: block; }
+  .portfolio-mobile-divider  { display: block; }
 }
 
 /* Portfolio scroll snap */

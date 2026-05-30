@@ -11,257 +11,366 @@ import { motion } from "framer-motion";
 
 const PORTFOLIO_SLIDES = [
   {
-    id: "weddings",
-    title: "Weddings",
+    id:       "weddings",
+    title:    "Weddings",
     imageUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80",
-    count: "24 stories",
+    count:    "24 stories",
+    tagline:  "Every vow spoken in silence, every tear that said what words couldn't.",
   },
   {
-    id: "couples",
-    title: "Couple Portraits",
+    id:       "couples",
+    title:    "Couple Portraits",
     imageUrl: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&q=80",
-    count: "18 sessions",
+    count:    "18 sessions",
+    tagline:  "Two people, one frame — a story written in glances.",
   },
   {
-    id: "maternity",
-    title: "Maternity",
+    id:       "maternity",
+    title:    "Maternity",
     imageUrl: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=800&q=80",
-    count: "12 sessions",
+    count:    "12 sessions",
+    tagline:  "The last quiet before everything beautiful begins.",
   },
   {
-    id: "events",
-    title: "Events",
+    id:       "events",
+    title:    "Events",
     imageUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
-    count: "30 events",
+    count:    "30 events",
+    tagline:  "The details everyone feels, but only you will remember.",
   },
   {
-    id: "conceptual",
-    title: "Conceptual",
+    id:       "conceptual",
+    title:    "Conceptual",
     imageUrl: "https://images.unsplash.com/photo-1460978812857-470ed1c77af0?w=800&q=80",
-    count: "8 projects",
+    count:    "8 projects",
+    tagline:  "Images that live somewhere between memory and dream.",
   },
 ];
 
-// ─── Mobile-only swipeable card carousel ───────────────────────────────────
+const FILTERS        = ["ALL", "WEDDINGS", "COUPLES", "MATERNITY", "EVENTS", "CONCEPTUAL"];
+const IDX_TO_FILTER  = ["WEDDINGS", "COUPLES", "MATERNITY", "EVENTS", "CONCEPTUAL"];
+const TOTAL          = PORTFOLIO_SLIDES.length;
+
+// ─── Mobile swipeable card carousel ────────────────────────────────────────
 
 function MobileCarousel() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [tappedIndex, setTappedIndex] = useState<number | null>(null);
+  const [activeIndex,     setActiveIndex]     = useState(0);
+  const [selectedFilter,  setSelectedFilter]  = useState("WEDDINGS");
 
-  const startXRef      = useRef(0);
-  const isDraggingRef  = useRef(false);
-  const wasSwipeRef    = useRef(false);
-  const tappedTimer    = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startXRef     = useRef(0);
+  const isDragging    = useRef(false);
+  const wasSwipe      = useRef(false);
 
-  const total = PORTFOLIO_SLIDES.length;
-
-  const goTo = (i: number) => setActiveIndex(Math.max(0, Math.min(i, total - 1)));
-  const nextSlide = () => goTo(activeIndex + 1);
-  const prevSlide = () => goTo(activeIndex - 1);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    startXRef.current     = e.touches[0].clientX;
-    isDraggingRef.current = true;
-    wasSwipeRef.current   = false;
+  const navigate = (i: number) => {
+    const idx = Math.max(0, Math.min(i, TOTAL - 1));
+    setActiveIndex(idx);
+    setSelectedFilter(IDX_TO_FILTER[idx]);
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!isDraggingRef.current) return;
+  const next = () => navigate(activeIndex + 1);
+  const prev = () => navigate(activeIndex - 1);
+
+  const handleFilterClick = (filter: string, fi: number) => {
+    setSelectedFilter(filter);
+    navigate(filter === "ALL" ? 0 : fi - 1);
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    startXRef.current = e.touches[0].clientX;
+    isDragging.current = true;
+    wasSwipe.current   = false;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!isDragging.current) return;
     const diff = startXRef.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 50) {
-      wasSwipeRef.current = true;
-      diff > 0 ? nextSlide() : prevSlide();
+      wasSwipe.current = true;
+      diff > 0 ? next() : prev();
     }
-    isDraggingRef.current = false;
+    isDragging.current = false;
   };
 
   const handleCardClick = (i: number) => {
-    // Swipe just fired — eat the synthetic click
-    if (wasSwipeRef.current) { wasSwipeRef.current = false; return; }
-    // Tapping a peeking card navigates to it
-    if (i !== activeIndex) { setActiveIndex(i); return; }
-    // Tapping the active card reveals color for 2 s
-    if (tappedTimer.current) clearTimeout(tappedTimer.current);
-    setTappedIndex(i);
-    tappedTimer.current = setTimeout(() => setTappedIndex(null), 2000);
+    if (wasSwipe.current) { wasSwipe.current = false; return; }
+    if (i !== activeIndex) { navigate(i); }
+    // tapping the active card does nothing beyond navigation (photos shown in full color)
   };
 
-  useEffect(() => () => { if (tappedTimer.current) clearTimeout(tappedTimer.current); }, []);
-
-  // translateX formula:
-  //   cardWidth = 100vw - 80px   (80px total = 40px peek each side)
-  //   gap       = 16px
-  //   step      = cardWidth + gap = 100vw - 64px
-  //   offset    = 40px (left peek)
-  //   translate = 40px - activeIndex * (100vw - 64px)
-  const trackTransform = `translateX(calc(40px - ${activeIndex} * (100vw - 64px)))`;
+  // translateX: step = cardWidth + gap = (100vw - 80px) + 16px = 100vw - 64px
+  // offset:     40px left peek
+  const trackX = `translateX(calc(40px - ${activeIndex} * (100vw - 64px)))`;
 
   return (
-    <div style={{ width: "100%", paddingBottom: 8 }}>
+    <div>
 
-      {/* ── Carousel track ── */}
+      {/* ── Filter pills ── */}
       <div
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        style={{ overflow: "hidden", width: "100%" }}
+        className="portfolio-filter-scroll"
+        style={{
+          display:                "flex",
+          overflowX:              "auto",
+          gap:                    8,
+          paddingBottom:          28,
+          scrollbarWidth:         "none",
+          msOverflowStyle:        "none",
+          WebkitOverflowScrolling: "touch",
+        } as React.CSSProperties}
       >
-        <div
-          style={{
-            display:    "flex",
-            gap:        16,
-            transition: "transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94)",
-            transform:  trackTransform,
-            willChange: "transform",
-          }}
-        >
-          {PORTFOLIO_SLIDES.map((slide, i) => (
-            <div
-              key={slide.id}
-              onClick={() => handleCardClick(i)}
+        {FILTERS.map((f, fi) => {
+          const active = f === selectedFilter || (f === "ALL" && activeIndex === 0 && selectedFilter === "WEDDINGS");
+          return (
+            <button
+              key={f}
+              onClick={() => handleFilterClick(f, fi)}
               style={{
                 flexShrink:    0,
-                width:         "calc(100vw - 80px)",
-                height:        "65vh",
-                borderRadius:  4,
-                overflow:      "hidden",
-                position:      "relative",
-                transform:     `scale(${i === activeIndex ? 1 : 0.96})`,
-                opacity:       i === activeIndex ? 1 : 0.6,
-                transition:    "transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.45s ease",
+                padding:       "7px 16px",
+                borderRadius:  20,
+                border:        `1px solid ${active ? "rgba(201,169,110,0.5)" : "rgba(255,255,255,0.15)"}`,
+                background:    active ? "rgba(201,169,110,0.12)" : "transparent",
+                color:         active ? "#c9a96e" : "rgba(255,255,255,0.38)",
+                fontFamily:    "'Inter', sans-serif",
+                fontSize:      "0.52rem",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
                 cursor:        "pointer",
+                transition:    "all 0.25s ease",
+                whiteSpace:    "nowrap",
               }}
             >
-              {/* Photo */}
-              <img
-                src={slide.imageUrl}
-                alt={slide.title}
-                style={{
-                  width:      "100%",
-                  height:     "100%",
-                  objectFit:  "cover",
-                  filter:     tappedIndex === i ? "grayscale(0%)" : "grayscale(100%)",
-                  transition: "filter 0.6s ease",
-                }}
-              />
-
-              {/* Bottom gradient */}
-              <div
-                style={{
-                  position:      "absolute",
-                  inset:         0,
-                  background:    "linear-gradient(transparent 40%, rgba(0,0,0,0.85))",
-                  pointerEvents: "none",
-                }}
-              />
-
-              {/* Text overlay */}
-              <div style={{ position: "absolute", bottom: 24, left: 20, right: 20 }}>
-                <p style={{
-                  fontFamily:    "'Inter', sans-serif",
-                  fontSize:      "0.5rem",
-                  letterSpacing: "0.3em",
-                  color:         "#c9a96e",
-                  textTransform: "uppercase",
-                  margin:        "0 0 6px",
-                }}>
-                  {slide.title.toUpperCase()}
-                </p>
-                <p style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize:   "0.75rem",
-                  fontWeight: 300,
-                  color:      "rgba(255,255,255,0.9)",
-                  margin:     0,
-                }}>
-                  {slide.count.charAt(0).toUpperCase() + slide.count.slice(1)}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+              {f}
+            </button>
+          );
+        })}
       </div>
 
-      {/* ── Navigation ── */}
-      <div style={{
-        display:        "flex",
-        flexDirection:  "column",
-        alignItems:     "center",
-        gap:            16,
-        marginTop:      28,
-        paddingLeft:    40,
-        paddingRight:   40,
-      }}>
+      {/* ── Carousel ── */}
+      <div style={{ position: "relative" }}>
 
-        {/* Arrows + counter */}
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <button
-            onClick={prevSlide}
-            disabled={activeIndex === 0}
-            aria-label="Previous"
+        {/* Track */}
+        <div
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          style={{ overflow: "hidden", width: "100%" }}
+        >
+          <div
             style={{
-              background:  "none",
-              border:      "none",
-              color:       activeIndex === 0 ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.65)",
-              fontSize:    "1.1rem",
-              cursor:      activeIndex === 0 ? "default" : "pointer",
-              padding:     "8px 14px",
-              transition:  "color 0.2s ease",
+              display:    "flex",
+              gap:        16,
+              transform:  trackX,
+              transition: "transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94)",
+              willChange: "transform",
             }}
           >
-            ←
-          </button>
+            {PORTFOLIO_SLIDES.map((slide, i) => {
+              const isActive = i === activeIndex;
+              return (
+                <div
+                  key={slide.id}
+                  onClick={() => handleCardClick(i)}
+                  style={{
+                    flexShrink:  0,
+                    width:       "calc(100vw - 80px)",
+                    height:      "65vh",
+                    borderRadius: 8,
+                    overflow:    "hidden",
+                    position:    "relative",
+                    transform:   `scale(${isActive ? 1 : 0.96})`,
+                    opacity:     isActive ? 1 : 0.55,
+                    transition:  "transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.45s ease",
+                    cursor:      "pointer",
+                  }}
+                >
+                  {/* Photo */}
+                  <img
+                    src={slide.imageUrl}
+                    alt={slide.title}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
 
-          <span style={{
-            fontFamily:  "'Cormorant Garamond', serif",
-            fontSize:    "1rem",
-            fontStyle:   "italic",
-            color:       "#c9a96e",
-            letterSpacing: "0.12em",
-            minWidth:    44,
-            textAlign:   "center",
-          }}>
-            {activeIndex + 1} / {total}
-          </span>
+                  {/* Dual gradient — dark top + dark bottom */}
+                  <div
+                    style={{
+                      position:      "absolute",
+                      inset:         0,
+                      background:    "linear-gradient(rgba(0,0,0,0.60) 0%, transparent 35%, transparent 52%, rgba(0,0,0,0.88) 100%)",
+                      pointerEvents: "none",
+                    }}
+                  />
 
-          <button
-            onClick={nextSlide}
-            disabled={activeIndex === total - 1}
-            aria-label="Next"
-            style={{
-              background:  "none",
-              border:      "none",
-              color:       activeIndex === total - 1 ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.65)",
-              fontSize:    "1.1rem",
-              cursor:      activeIndex === total - 1 ? "default" : "pointer",
-              padding:     "8px 14px",
-              transition:  "color 0.2s ease",
-            }}
-          >
-            →
-          </button>
+                  {/* ── Top info bar ── */}
+                  <div
+                    style={{
+                      position:       "absolute",
+                      top:            22,
+                      left:           20,
+                      right:          20,
+                      display:        "flex",
+                      justifyContent: "space-between",
+                      alignItems:     "center",
+                    }}
+                  >
+                    <span style={{
+                      fontFamily:    "'Inter', sans-serif",
+                      fontSize:      "0.47rem",
+                      letterSpacing: "0.3em",
+                      color:         "#c9a96e",
+                      textTransform: "uppercase",
+                    }}>
+                      {slide.title.toUpperCase()}
+                    </span>
+                    <span style={{
+                      fontFamily:    "'Inter', sans-serif",
+                      fontSize:      "0.5rem",
+                      letterSpacing: "0.08em",
+                      color:         "rgba(255,255,255,0.6)",
+                      display:       "flex",
+                      alignItems:    "center",
+                      gap:           5,
+                    }}>
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <rect x="1" y="2.5" width="8" height="6" rx="1" stroke="currentColor" strokeWidth="0.8"/>
+                        <circle cx="5" cy="5.5" r="1.5" stroke="currentColor" strokeWidth="0.8"/>
+                        <path d="M3.5 2.5V2a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v.5" stroke="currentColor" strokeWidth="0.8"/>
+                      </svg>
+                      {slide.count}
+                    </span>
+                  </div>
+
+                  {/* ── Center: title + gold divider ── */}
+                  <div
+                    style={{
+                      position:  "absolute",
+                      top:       "50%",
+                      left:      20,
+                      right:     20,
+                      transform: "translateY(-52%)",
+                      textAlign: "center",
+                    }}
+                  >
+                    <p style={{
+                      fontFamily:    "'Cormorant Garamond', serif",
+                      fontSize:      "clamp(1.9rem, 9vw, 2.8rem)",
+                      fontStyle:     "italic",
+                      fontWeight:    300,
+                      color:         "#f5f0e8",
+                      lineHeight:    1.25,
+                      margin:        "0 0 18px",
+                      letterSpacing: "0.02em",
+                    }}>
+                      {slide.title}
+                    </p>
+                    <div style={{
+                      width:      44,
+                      height:     1,
+                      background: "rgba(201,169,110,0.55)",
+                      margin:     "0 auto",
+                    }} />
+                  </div>
+
+                  {/* ── Bottom: tagline + counter ── */}
+                  <div
+                    style={{
+                      position:  "absolute",
+                      bottom:    22,
+                      left:      20,
+                      right:     20,
+                      textAlign: "center",
+                    }}
+                  >
+                    <p style={{
+                      fontFamily:    "'Cormorant Garamond', serif",
+                      fontStyle:     "italic",
+                      fontSize:      "0.6rem",
+                      color:         "rgba(255,255,255,0.5)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.2em",
+                      lineHeight:    1.9,
+                      margin:        "0 0 12px",
+                    }}>
+                      {slide.tagline}
+                    </p>
+                    <p style={{
+                      fontFamily:    "'Cormorant Garamond', serif",
+                      fontStyle:     "italic",
+                      fontSize:      "0.85rem",
+                      color:         "#c9a96e",
+                      letterSpacing: "0.18em",
+                      margin:        0,
+                      opacity:       isActive ? 1 : 0,
+                      transition:    "opacity 0.35s ease",
+                    }}>
+                      {String(i + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Dot indicators */}
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {PORTFOLIO_SLIDES.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveIndex(i)}
-              aria-label={`Go to slide ${i + 1}`}
-              style={{
-                width:        i === activeIndex ? 8 : 5,
-                height:       i === activeIndex ? 8 : 5,
-                borderRadius: "50%",
-                background:   i === activeIndex ? "#c9a96e" : "rgba(255,255,255,0.2)",
-                border:       "none",
-                padding:      0,
-                cursor:       "pointer",
-                transition:   "all 0.3s ease",
-                flexShrink:   0,
-              }}
-            />
-          ))}
-        </div>
+        {/* ── Left arrow (overlaid) ── */}
+        <button
+          onClick={prev}
+          disabled={activeIndex === 0}
+          aria-label="Previous"
+          style={{
+            position:           "absolute",
+            left:               20,
+            top:                "62%",
+            transform:          "translateY(-50%)",
+            width:              44,
+            height:             44,
+            borderRadius:       "50%",
+            background:         activeIndex === 0 ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.52)",
+            border:             "1px solid rgba(255,255,255,0.1)",
+            color:              activeIndex === 0 ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.88)",
+            display:            "flex",
+            alignItems:         "center",
+            justifyContent:     "center",
+            cursor:             activeIndex === 0 ? "default" : "pointer",
+            backdropFilter:     "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            zIndex:             10,
+            fontSize:           "1.3rem",
+            lineHeight:         1,
+            transition:         "color 0.2s ease, background 0.2s ease",
+          } as React.CSSProperties}
+        >
+          ‹
+        </button>
+
+        {/* ── Right arrow (overlaid) ── */}
+        <button
+          onClick={next}
+          disabled={activeIndex === TOTAL - 1}
+          aria-label="Next"
+          style={{
+            position:           "absolute",
+            right:              20,
+            top:                "62%",
+            transform:          "translateY(-50%)",
+            width:              44,
+            height:             44,
+            borderRadius:       "50%",
+            background:         activeIndex === TOTAL - 1 ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.52)",
+            border:             "1px solid rgba(255,255,255,0.1)",
+            color:              activeIndex === TOTAL - 1 ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.88)",
+            display:            "flex",
+            alignItems:         "center",
+            justifyContent:     "center",
+            cursor:             activeIndex === TOTAL - 1 ? "default" : "pointer",
+            backdropFilter:     "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            zIndex:             10,
+            fontSize:           "1.3rem",
+            lineHeight:         1,
+            transition:         "color 0.2s ease, background 0.2s ease",
+          } as React.CSSProperties}
+        >
+          ›
+        </button>
 
       </div>
     </div>
@@ -274,7 +383,7 @@ export default function Portfolio() {
   return (
     <section id="work">
       <HoverSlider
-        className="min-h-screen bg-[#0a0a0a] text-[#f5f0e8] py-24 flex flex-col justify-center"
+        className="min-h-screen bg-[#0a0a0a] text-[#f5f0e8] flex flex-col justify-center"
         style={{ padding: "96px 5%" }}
       >
 
@@ -290,6 +399,10 @@ export default function Portfolio() {
           >
             Selected Work
           </motion.p>
+
+          {/* Short gold line — mobile only (via globals.css) */}
+          <div className="portfolio-mobile-divider" style={{ width: 48, height: 1, background: "rgba(201,169,110,0.4)", marginBottom: 16 }} />
+
           <motion.h2
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -370,13 +483,28 @@ export default function Portfolio() {
 
         </div>
 
-        {/* Mobile carousel — hidden on desktop via globals.css .portfolio-mobile-carousel */}
-        {/* Negative margin escapes the section's 5vw horizontal padding for full-bleed cards */}
-        <div
-          className="portfolio-mobile-carousel"
-          style={{ margin: "0 -5vw" }}
-        >
-          <MobileCarousel />
+        {/* Mobile carousel — hidden on desktop via globals.css .portfolio-mobile-carousel  */}
+        <div className="portfolio-mobile-carousel">
+
+          {/* Description — mobile only */}
+          <p style={{
+            fontFamily:    "'Cormorant Garamond', serif",
+            fontSize:      "1rem",
+            fontStyle:     "italic",
+            color:         "rgba(245,240,232,0.55)",
+            lineHeight:    1.7,
+            marginBottom:  28,
+            letterSpacing: "0.01em",
+          }}>
+            Every session is a story — captured in light, lived in moments,
+            and felt long after the camera is put away.
+          </p>
+
+          {/* Carousel (breaks out of 5vw section padding for full-bleed cards) */}
+          <div style={{ margin: "0 -5vw" }}>
+            <MobileCarousel />
+          </div>
+
         </div>
 
       </HoverSlider>
