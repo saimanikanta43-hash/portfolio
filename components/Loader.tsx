@@ -19,6 +19,7 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
     const container = containerRef.current
     if (!container) return
 
+    // Pre-populate all spans with final letters for width measurement (prevents layout shift)
     const spans: HTMLSpanElement[] = []
     FINAL_NAME.forEach((letter) => {
       const span = document.createElement('span')
@@ -39,63 +40,105 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
     })
 
     function finishLoader() {
-      // Step 1: fade in tagline
+      const loaderLetters = containerRef.current
+      const navLogo       = document.querySelector('.nav-logo') as HTMLElement | null
+
+      // Fade out tagline immediately
       const tagline = taglineRef.current
       if (tagline) {
-        setTimeout(() => {
-          tagline.style.transition = 'opacity 500ms ease'
-          tagline.style.opacity    = '1'
-        }, 200)
+        tagline.style.transition = 'opacity 0.3s ease'
+        tagline.style.opacity    = '0'
       }
 
-      // Step 2: crossfade logos + fade out bg and text group
+      if (!loaderLetters || !navLogo) {
+        // Fallback: skip fly, just crossfade
+        document.body.classList.add('hero-revealed')
+        const heroLogo = document.getElementById('hero-logo-mark')
+        if (heroLogo) {
+          (heroLogo as HTMLElement).style.transition = 'opacity 300ms ease'
+          ;(heroLogo as HTMLElement).style.opacity   = '1'
+        }
+        const wrap = document.getElementById('loader-logo-wrap')
+        if (wrap) {
+          wrap.style.transition = 'opacity 300ms ease'
+          wrap.style.opacity    = '0'
+        }
+        const bg = document.getElementById('loader-bg')
+        if (bg) {
+          bg.style.transition = 'opacity 500ms ease'
+          bg.style.opacity    = '0'
+        }
+        setTimeout(() => {
+          const loader = document.getElementById('smk-loader')
+          if (loader) loader.remove()
+          document.body.style.overflow = 'auto'
+          onComplete()
+        }, 1000)
+        return
+      }
+
+      // ── PHASE 1: Letters fly from center to navbar logo position ──
+      const loaderRect = loaderLetters.getBoundingClientRect()
+      const navRect    = navLogo.getBoundingClientRect()
+
+      const loaderCX = loaderRect.left + loaderRect.width  / 2
+      const loaderCY = loaderRect.top  + loaderRect.height / 2
+      const navCX    = navRect.left    + navRect.width     / 2
+      const navCY    = navRect.top     + navRect.height    / 2
+
+      const deltaX = navCX - loaderCX
+      const deltaY = navCY - loaderCY
+      const scale  = navRect.width / loaderRect.width
+
+      loaderLetters.style.transformOrigin = 'center center'
+      loaderLetters.style.transition      = 'transform 0.8s cubic-bezier(0.76,0,0.24,1)'
+      loaderLetters.style.transform       = `translate(${deltaX}px, ${deltaY}px) scale(${scale})`
+
+      // ── PHASE 2: at 800ms — text lands, swap with nav logo, crossfade eye logos ──
       setTimeout(() => {
-        // Clear fill-mode on loader SVG then fade out wrapper
+        // Swap: loader letters out, nav logo in (same position)
+        loaderLetters.style.transition = 'opacity 0.3s ease'
+        loaderLetters.style.opacity    = '0'
+        navLogo.style.transition       = 'opacity 0.3s ease'
+        navLogo.style.opacity          = '1'
+
+        // Eye logo crossfade: loader → hero (simultaneously, logo never disappears)
         const wrap = document.getElementById('loader-logo-wrap')
         if (wrap) {
           const svg = wrap.querySelector('svg')
           if (svg) {
-            (svg as unknown as HTMLElement).style.animation = 'none'
+            // Clear animation fill-mode so JS opacity takes over cleanly
+            ;(svg as unknown as HTMLElement).style.animation = 'none'
             svg.getBoundingClientRect() // force reflow
           }
-          wrap.style.transition = 'opacity 250ms ease'
+          wrap.style.transition = 'opacity 300ms ease'
           wrap.style.opacity    = '0'
         }
-
-        // Fade in hero logo simultaneously
         const heroLogo = document.getElementById('hero-logo-mark')
         if (heroLogo) {
-          (heroLogo as HTMLElement).style.transition = 'opacity 250ms ease'
+          (heroLogo as HTMLElement).style.transition = 'opacity 300ms ease'
           ;(heroLogo as HTMLElement).style.opacity   = '1'
         }
 
-        // Fade out background
+        // Fade loader background (reveals hero behind it)
         const bg = document.getElementById('loader-bg')
         if (bg) {
-          bg.style.transition = 'opacity 400ms ease'
+          bg.style.transition = 'opacity 500ms ease'
           bg.style.opacity    = '0'
         }
 
-        // Fade out text group
-        const textGroup = document.getElementById('loader-text-group')
-        if (textGroup) {
-          textGroup.style.transition = 'opacity 200ms ease'
-          textGroup.style.opacity    = '0'
-        }
-      }, 400)
-
-      // Step 3: trigger hero text reveal
-      setTimeout(() => {
+        // Trigger staggered hero + nav-links reveal via CSS class
+        // (see globals.css: body.hero-revealed rules with staggered delays)
         document.body.classList.add('hero-revealed')
-      }, 550)
+      }, 800)
 
-      // Step 4: remove loader entirely
+      // ── PHASE 3: remove loader after hero reveal completes ──
       setTimeout(() => {
         const loader = document.getElementById('smk-loader')
         if (loader) loader.remove()
         document.body.style.overflow = 'auto'
         onComplete()
-      }, 1000)
+      }, 1800)
     }
 
     function scrambleLetter(index: number) {
@@ -133,6 +176,7 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
 
     document.body.style.overflow = 'hidden'
     requestAnimationFrame(() => {
+      // Lock each span's width before scrambling to prevent layout shift
       spans.forEach(span => {
         const w = span.getBoundingClientRect().width
         span.style.width = `${w}px`
@@ -167,13 +211,13 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
         .ldr-tri-ccw { animation: loaderSpinCCW 12s linear infinite; transform-origin: 60px 60px; }
       `}</style>
 
-      {/* Background layer — fades out independently */}
+      {/* Background layer — fades out independently during transition */}
       <div
         id="loader-bg"
         style={{ position: 'absolute', inset: 0, background: '#0a0a0a' }}
       />
 
-      {/* Logo — same absolute position as hero logo for seamless crossfade */}
+      {/* Eye logo — same absolute position as hero logo for seamless crossfade */}
       <div
         id="loader-logo-wrap"
         style={{
@@ -216,9 +260,8 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
         </svg>
       </div>
 
-      {/* Text group — letters + tagline, fades out during transition */}
+      {/* Text stack — letters + tagline, vertically centered below logo */}
       <div
-        id="loader-text-group"
         style={{
           position:      'absolute',
           top:           'calc(40% + 76px)',
@@ -231,10 +274,13 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
           gap:           '20px',
         }}
       >
+        {/* Letters container — flies to navbar via JS transform */}
         <div
           ref={containerRef}
           style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline' }}
         />
+
+        {/* Tagline — fades out before letters fly */}
         <p
           ref={taglineRef}
           style={{

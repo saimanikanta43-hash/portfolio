@@ -105,19 +105,31 @@ button {
   height: 100vh;
 }
 
-/* ── Shared-element transition: hero starts fully hidden ── */
-#hero-logo-mark          { opacity: 0; }
-.hero-name               { opacity: 0; transform: translateY(24px); }
-.hero-divider            { opacity: 0; }
-.hero-tagline            { opacity: 0; }
-.hero-scroll-wrap        { opacity: 0; }
+/* ── Shared-element transition: everything starts hidden ── */
+#hero-logo-mark   { opacity: 0; }
+#nav-links        { opacity: 0; }
+.hero-name        { opacity: 0; transform: translateY(24px); }
+.hero-divider     { opacity: 0; }
+.hero-tagline     { opacity: 0; }
+.hero-scroll-wrap { opacity: 0; }
 
-/* ── Staggered reveal when loader adds .hero-revealed to <body> ── */
+@media (max-width: 768px) {
+  .hero-name { transform: translateY(14px); }
+}
+
+/* ── Staggered reveal triggered by loader adding .hero-revealed to <body> ── */
+/* Timing anchors: body.hero-revealed is added 800ms into finishLoader (when text lands in navbar) */
+/* 0ms  → hero bg visible (loader bg fades out simultaneously)                                   */
+/* 200ms → hero name fades up        (delay 0.2s)                                                */
+/* 400ms → hero tagline fades in     (delay 0.4s)                                                */
+/* 500ms → navbar links fade in      (delay 0.5s)                                                */
+/* 800ms → scroll indicator fades in (delay 0.8s)                                                */
+
 body.hero-revealed .hero-name {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 1s ease 0.1s,
-              transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.1s;
+  transition: opacity 1s ease 0.2s,
+              transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
 }
 body.hero-revealed .hero-divider {
   opacity: 1;
@@ -125,9 +137,13 @@ body.hero-revealed .hero-divider {
 }
 body.hero-revealed .hero-tagline {
   opacity: 1;
-  transition: opacity 0.8s ease 0.3s;
+  transition: opacity 0.8s ease 0.4s;
 }
 body.hero-revealed .hero-scroll-wrap {
   opacity: 0.65;
-  transition: opacity 0.6s ease 0.7s;
+  transition: opacity 0.6s ease 0.8s;
+}
+body.hero-revealed #nav-links {
+  opacity: 1;
+  transition: opacity 0.6s ease 0.5s;
 }

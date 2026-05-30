@@ -27,7 +27,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -44,10 +43,8 @@ export default function Navbar() {
 
   return (
     <>
-      <motion.nav
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, delay: 2.8, ease: [0.22, 1, 0.36, 1] }}
+      {/* Nav entry is controlled by loader JS (body.hero-revealed) — no Framer Motion entry here */}
+      <nav
         className="fixed top-0 left-0 right-0 z-[900] flex items-center justify-between px-8 md:px-16"
         style={{
           paddingTop:    28,
@@ -62,8 +59,9 @@ export default function Navbar() {
           transition:     "background 0.6s ease, backdrop-filter 0.6s ease, border-bottom 0.6s ease",
         }}
       >
-        {/* Logo */}
+        {/* Logo — starts hidden; loader fly animation swaps into this */}
         <button
+          className="nav-logo"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           style={{
             fontFamily:    "'Playfair Display', serif",
@@ -72,76 +70,78 @@ export default function Navbar() {
             letterSpacing: "0.1em",
             color:         dark ? "rgba(255,255,255,0.88)" : scrolled ? "#f5f0e8" : "#F2E8DC",
             transition:    "color 0.5s ease",
+            opacity:       0,
           }}
         >
           Stories by Nayanam
         </button>
 
-        {/* Desktop nav links */}
-        <ul className="hidden md:flex gap-10">
-          {links.map((link) => (
-            <li key={link}>
-              <button
-                onClick={() => scrollTo(link)}
-                style={{
-                  fontFamily:    "'Inter', sans-serif",
-                  fontSize:      "0.68rem",
-                  fontWeight:    400,
-                  letterSpacing: "0.24em",
-                  textTransform: "uppercase",
-                  color:         dark ? "rgba(255,255,255,0.42)" : scrolled ? "rgba(255,255,255,0.55)" : "#9E8E98",
-                  transition:    "color 0.3s ease",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.color = dark ? "rgba(255,255,255,0.90)" : scrolled ? "#f5f0e8" : "#F2E8DC")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.color = dark ? "rgba(255,255,255,0.42)" : scrolled ? "rgba(255,255,255,0.55)" : "#9E8E98")
-                }
-              >
-                {link}
-              </button>
-            </li>
-          ))}
-        </ul>
+        {/* Links + hamburger — revealed by body.hero-revealed via #nav-links in globals.css */}
+        <div id="nav-links" style={{ display: "flex", alignItems: "center" }}>
+          <ul className="hidden md:flex gap-10">
+            {links.map((link) => (
+              <li key={link}>
+                <button
+                  onClick={() => scrollTo(link)}
+                  style={{
+                    fontFamily:    "'Inter', sans-serif",
+                    fontSize:      "0.68rem",
+                    fontWeight:    400,
+                    letterSpacing: "0.24em",
+                    textTransform: "uppercase",
+                    color:         dark ? "rgba(255,255,255,0.42)" : scrolled ? "rgba(255,255,255,0.55)" : "#9E8E98",
+                    transition:    "color 0.3s ease",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.color = dark ? "rgba(255,255,255,0.90)" : scrolled ? "#f5f0e8" : "#F2E8DC")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color = dark ? "rgba(255,255,255,0.42)" : scrolled ? "rgba(255,255,255,0.55)" : "#9E8E98")
+                  }
+                >
+                  {link}
+                </button>
+              </li>
+            ))}
+          </ul>
 
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden"
-          onClick={() => setMenuOpen((v) => !v)}
-          aria-label="Toggle menu"
-          style={{
-            display:        "flex",
-            flexDirection:  "column",
-            justifyContent: "center",
-            gap:            5,
-            padding:        4,
-            background:     "none",
-            border:         "none",
-          }}
-        >
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              style={{
-                display:         "block",
-                width:           22,
-                height:          1,
-                background:      dark ? "rgba(255,255,255,0.8)" : "#111111",
-                transformOrigin: "center",
-                transition:      "transform 0.3s ease, opacity 0.3s ease",
-                transform:
-                  menuOpen
-                    ? i === 0 ? "translateY(6px) rotate(45deg)"
-                    : i === 2 ? "translateY(-6px) rotate(-45deg)"
-                    : "scaleX(0)"
-                    : "none",
-                opacity: menuOpen && i === 1 ? 0 : 1,
-              }}
-            />
-          ))}
-        </button>
-      </motion.nav>
+          <button
+            className="md:hidden"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="Toggle menu"
+            style={{
+              display:        "flex",
+              flexDirection:  "column",
+              justifyContent: "center",
+              gap:            5,
+              padding:        4,
+              background:     "none",
+              border:         "none",
+            }}
+          >
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                style={{
+                  display:         "block",
+                  width:           22,
+                  height:          1,
+                  background:      dark ? "rgba(255,255,255,0.8)" : "#111111",
+                  transformOrigin: "center",
+                  transition:      "transform 0.3s ease, opacity 0.3s ease",
+                  transform:
+                    menuOpen
+                      ? i === 0 ? "translateY(6px) rotate(45deg)"
+                      : i === 2 ? "translateY(-6px) rotate(-45deg)"
+                      : "scaleX(0)"
+                      : "none",
+                  opacity: menuOpen && i === 1 ? 0 : 1,
+                }}
+              />
+            ))}
+          </button>
+        </div>
+      </nav>
 
       {/* Mobile fullscreen menu overlay */}
       <AnimatePresence>
