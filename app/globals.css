@@ -92,6 +92,14 @@ button {
   z-index: 997;
 }
 
+/* Portfolio responsive — desktop list hidden on mobile, carousel hidden on desktop */
+.portfolio-mobile-carousel { display: none; }
+
+@media (max-width: 768px) {
+  .portfolio-desktop-content { display: none !important; }
+  .portfolio-mobile-carousel { display: block; }
+}
+
 /* Portfolio scroll snap */
 .snap-container {
   height: 100vh;
