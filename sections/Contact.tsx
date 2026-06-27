@@ -4,13 +4,38 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { staggerContainer, fadeUp } from "@/lib/motion";
 
+const srOnly: React.CSSProperties = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  overflow: "hidden",
+  clip: "rect(0,0,0,0)",
+  whiteSpace: "nowrap",
+};
+
 export default function Contact() {
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({ name: "", email: "", message: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setSent(true);
+    } catch {
+      setError("Something went wrong. Please email me directly at nayanam@photography.com");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputStyle: React.CSSProperties = {
@@ -103,30 +128,35 @@ export default function Contact() {
                 fontSize: "0.9rem",
                 fontWeight: 300,
                 lineHeight: 1.8,
-                color: "#888888",
-                marginBottom: 48,
+                color: "var(--text-muted)",
+                marginBottom: 16,
                 maxWidth: 380,
               }}
             >
-              Whether it's a personal project, editorial commission, or
-              something entirely new — let's create something worth
-              remembering.
+              Currently booking weddings &amp; portraits for 2025–26.
+              Let&apos;s create something worth remembering.
+            </p>
+
+            <p
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "0.78rem",
+                fontWeight: 300,
+                lineHeight: 1.7,
+                color: "var(--text-muted)",
+                marginBottom: 48,
+                maxWidth: 380,
+                opacity: 0.7,
+              }}
+            >
+              Whether it&apos;s a wedding, editorial commission, or something
+              entirely new — reach out and I&apos;ll reply within 48 hours.
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <a
                 href="mailto:nayanam@photography.com"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 16,
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.querySelector("span")!.style.color = "#111111")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.querySelector("span")!.style.color = "#888888")
-                }
+                style={{ display: "flex", alignItems: "center", gap: 16 }}
               >
                 <div
                   style={{
@@ -137,6 +167,7 @@ export default function Contact() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    flexShrink: 0,
                   }}
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D4899A" strokeWidth="1.5">
@@ -149,7 +180,7 @@ export default function Contact() {
                     fontFamily: "'Inter', sans-serif",
                     fontSize: "0.85rem",
                     fontWeight: 300,
-                    color: "#888888",
+                    color: "var(--text-muted)",
                     transition: "color 0.3s ease",
                   }}
                 >
@@ -162,12 +193,6 @@ export default function Contact() {
                 target="_blank"
                 rel="noreferrer"
                 style={{ display: "flex", alignItems: "center", gap: 16 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.querySelector("span")!.style.color = "#111111")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.querySelector("span")!.style.color = "#888888")
-                }
               >
                 <div
                   style={{
@@ -178,6 +203,7 @@ export default function Contact() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    flexShrink: 0,
                   }}
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D4899A" strokeWidth="1.5">
@@ -191,7 +217,7 @@ export default function Contact() {
                     fontFamily: "'Inter', sans-serif",
                     fontSize: "0.85rem",
                     fontWeight: 300,
-                    color: "#888888",
+                    color: "var(--text-muted)",
                     transition: "color 0.3s ease",
                   }}
                 >
@@ -227,24 +253,26 @@ export default function Contact() {
                   marginBottom: 16,
                 }}
               >
-                Thank you.
+                Thank you ✦
               </p>
               <p
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: "0.9rem",
                   fontWeight: 300,
-                  color: "#888888",
+                  color: "var(--text-muted)",
                   lineHeight: 1.8,
                 }}
               >
-                Your message has been received. I'll be in touch soon.
+                Your message has been received. I&apos;ll reply within 48 hours.
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 32 }}>
               <div>
+                <label htmlFor="contact-name" style={srOnly}>Your Name</label>
                 <input
+                  id="contact-name"
                   type="text"
                   placeholder="Your Name"
                   required
@@ -255,8 +283,11 @@ export default function Contact() {
                   onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(255,255,255,0.12)")}
                 />
               </div>
+
               <div>
+                <label htmlFor="contact-email" style={srOnly}>Email Address</label>
                 <input
+                  id="contact-email"
                   type="email"
                   placeholder="Email Address"
                   required
@@ -267,9 +298,12 @@ export default function Contact() {
                   onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(255,255,255,0.12)")}
                 />
               </div>
+
               <div>
+                <label htmlFor="contact-message" style={srOnly}>Tell me about your wedding or shoot</label>
                 <textarea
-                  placeholder="Tell me about your project..."
+                  id="contact-message"
+                  placeholder="Tell me about your wedding or shoot..."
                   required
                   rows={4}
                   value={form.message}
@@ -280,8 +314,23 @@ export default function Contact() {
                 />
               </div>
 
+              {error && (
+                <p
+                  role="alert"
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: "0.8rem",
+                    color: "#e07070",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {error}
+                </p>
+              )}
+
               <button
                 type="submit"
+                disabled={loading}
                 style={{
                   alignSelf: "flex-start",
                   padding: "16px 40px",
@@ -292,10 +341,12 @@ export default function Contact() {
                   fontWeight: 400,
                   letterSpacing: "0.3em",
                   textTransform: "uppercase",
-                  color: "var(--text)",
-                  transition: "background 0.4s ease, border-color 0.4s ease",
+                  color: loading ? "rgba(245,240,232,0.4)" : "var(--text)",
+                  cursor: loading ? "default" : "pointer",
+                  transition: "background 0.4s ease, border-color 0.4s ease, color 0.3s ease",
                 }}
                 onMouseEnter={(e) => {
+                  if (loading) return;
                   e.currentTarget.style.background = "rgba(212,137,154,0.1)";
                   e.currentTarget.style.borderColor = "rgba(212,137,154,0.7)";
                 }}
@@ -304,13 +355,12 @@ export default function Contact() {
                   e.currentTarget.style.borderColor = "rgba(212,137,154,0.4)";
                 }}
               >
-                Send Message
+                {loading ? "Sending..." : "Start the Conversation"}
               </button>
             </form>
           )}
         </motion.div>
       </div>
-
     </section>
   );
 }
