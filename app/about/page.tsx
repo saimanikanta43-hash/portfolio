@@ -1,7 +1,6 @@
 import CtaBand from "@/components/CtaBand";
 
-const ABOUT_PHOTO =
-  "https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=800&q=80";
+const ABOUT_PHOTO = "/images/portraits/SMK08790.JPG";
 
 const STATS = [
   { n: "100+", l: "SESSIONS PHOTOGRAPHED" },

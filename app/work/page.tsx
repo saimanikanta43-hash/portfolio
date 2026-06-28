@@ -3,22 +3,28 @@
 import { useState } from "react";
 import CtaBand from "@/components/CtaBand";
 
-const FILTERS = ["ALL", "WEDDINGS", "PORTRAITS", "PRE-WEDDING", "EVENTS"] as const;
+const FILTERS = ["ALL", "WEDDINGS", "PORTRAITS", "PRE-WEDDING"] as const;
 type Filter = (typeof FILTERS)[number];
 
 const IMAGES: { src: string; height: number; cat: string }[] = [
-  { src: "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80", height: 420, cat: "WEDDINGS" },
-  { src: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&q=80", height: 300, cat: "PORTRAITS" },
-  { src: "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=600&q=80", height: 360, cat: "WEDDINGS" },
-  { src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80", height: 340, cat: "PORTRAITS" },
-  { src: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=600&q=80", height: 440, cat: "PRE-WEDDING" },
-  { src: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=80", height: 320, cat: "EVENTS" },
-  { src: "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=600&q=80", height: 380, cat: "WEDDINGS" },
-  { src: "https://images.unsplash.com/photo-1460978812857-470ed1c77af0?w=600&q=80", height: 300, cat: "PRE-WEDDING" },
-  { src: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=600&q=80", height: 420, cat: "PORTRAITS" },
-  { src: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&q=80", height: 350, cat: "WEDDINGS" },
-  { src: "https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=600&q=80", height: 290, cat: "EVENTS" },
-  { src: "https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?w=600&q=80", height: 400, cat: "PORTRAITS" },
+  { src: "/images/weddings/1.JPG",              height: 420, cat: "WEDDINGS" },
+  { src: "/images/portraits/1.JPG",             height: 300, cat: "PORTRAITS" },
+  { src: "/images/pre-wedding/DSC04811.JPG",    height: 420, cat: "PRE-WEDDING" },
+  { src: "/images/weddings/4.JPG",              height: 360, cat: "WEDDINGS" },
+  { src: "/images/portraits/3.JPG",             height: 440, cat: "PORTRAITS" },
+  { src: "/images/pre-wedding/SMK03530.JPG",    height: 360, cat: "PRE-WEDDING" },
+  { src: "/images/weddings/7.JPG",              height: 380, cat: "WEDDINGS" },
+  { src: "/images/portraits/6.JPG",             height: 340, cat: "PORTRAITS" },
+  { src: "/images/pre-wedding/_SMK5613.JPG",    height: 300, cat: "PRE-WEDDING" },
+  { src: "/images/weddings/10.JPG",             height: 300, cat: "WEDDINGS" },
+  { src: "/images/portraits/SMK08790.JPG",      height: 380, cat: "PORTRAITS" },
+  { src: "/images/pre-wedding/_SMK5700.JPG",    height: 440, cat: "PRE-WEDDING" },
+  { src: "/images/weddings/14.JPG",             height: 350, cat: "WEDDINGS" },
+  { src: "/images/portraits/9.JPG",             height: 290, cat: "PORTRAITS" },
+  { src: "/images/pre-wedding/DSC04826.JPG",    height: 380, cat: "PRE-WEDDING" },
+  { src: "/images/weddings/17.JPG",             height: 400, cat: "WEDDINGS" },
+  { src: "/images/portraits/12.JPG",            height: 320, cat: "PORTRAITS" },
+  { src: "/images/pre-wedding/_SMK5633.JPG",    height: 420, cat: "PRE-WEDDING" },
 ];
 
 export default function Work() {

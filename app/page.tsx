@@ -1,26 +1,25 @@
 import Link from "next/link";
 import CtaBand from "@/components/CtaBand";
 
-const HERO_BG =
-  "https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=85";
+const HERO_BG = "/images/hero.JPG";
 
 const CATEGORIES = [
   {
     title:  "Weddings",
     count:  "24 STORIES",
-    img:    "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&q=80",
+    img:    "/images/weddings/1.JPG",
     offset: false,
   },
   {
     title:  "Portraits",
     count:  "18 SESSIONS",
-    img:    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&q=80",
+    img:    "/images/portraits/1.JPG",
     offset: true,
   },
   {
-    title:  "Events",
-    count:  "30 EVENTS",
-    img:    "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
+    title:  "Pre-Wedding",
+    count:  "12 SESSIONS",
+    img:    "/images/pre-wedding/DSC04811.JPG",
     offset: false,
   },
 ];
